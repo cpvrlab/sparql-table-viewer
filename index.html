@@ -26,7 +26,7 @@
 
                 ?m <http://example.org/unit> ?u.
                 ?u rdfs:label ?unit.
-                FILTER (lang(?unid) = 'de')
+                FILTER (lang(?unit) = 'de')
 
                 ?m <http://example.org/pollutant> ?p.
                 ?p rdfs:label ?pollutant.
@@ -56,7 +56,7 @@
         var grid;
         var loader;
         var columns = [];
-        var PAGESIZE = 32166;
+        var PAGESIZE = 65779;
         var columnWidth = 350;
         var options = {
             enableCellNavigation: false,
@@ -69,7 +69,7 @@
             rowHeight: 24
         };
 
-        loader = new udb.DataLoader(32166, PAGESIZE);
+        loader = new udb.DataLoader(65779, PAGESIZE);
 
         $(function () {
 
