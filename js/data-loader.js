@@ -15,7 +15,6 @@
             orderBy: "",
             limit: ""
         };
-
         // events
         var onDataLoading = new Slick.Event();
         var onDataLoaded = new Slick.Event();
@@ -31,7 +30,7 @@
             columns = [];
             pagesToLoad = {};
         }
-
+        
         // from and to are 0-based row indices.
         function ensureData(from, to) {
 
