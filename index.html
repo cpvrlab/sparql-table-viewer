@@ -9,23 +9,29 @@
 <body>
     <form>
         <textarea id="query" style="width:90%;height:130px;padding:0;">
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+           PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             PREFIX u28: <http://environment.data.admin.ch/ubd/28/>
 
-            SELECT ?pollutant ?measurement ?unit ?year ?station WHERE {
+            SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 ?m a <http://example.org/Measurement> .
                 ?m <http://example.org/measurement> ?measurement.
-                ?m <http://example.org/aggregation> <http://environment.data.admin.ch/ubd/28/aggregation/annualmean>.
-                #?m <http://example.org/station> <http://environment.data.admin.ch/ubd/28/station/blBAS>. #?station.
+                
+                ?m <http://example.org/aggregation> ?a.
+                ?a  rdfs:label ?aggregation.
+                FILTER (lang(?aggregation) = 'de')
 
                 ?m <http://example.org/station> ?s.
                 ?s rdfs:label ?station.
+
                 ?m <http://example.org/unit> ?u.
                 ?u rdfs:label ?unit.
+                FILTER (lang(?unid) = 'de')
+
                 ?m <http://example.org/pollutant> ?p.
                 ?p rdfs:label ?pollutant.
                 FILTER (lang(?pollutant) = 'de')
+
                 ?m <http://example.org/year> ?y
                 BIND(SUBSTR(xsd:string(?y),46) AS ?year)
             }
