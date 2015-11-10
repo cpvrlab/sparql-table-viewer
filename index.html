@@ -40,7 +40,10 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
         <br /><br />
     </form>
-    <div id="myGrid" style="width:90%;height:490px;"></div>
+    <div id="myGrid" style="width:90%;height:490px;">
+
+        <div><label>test</label></div>
+    </div>
     </table>
 
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery-1.7.min.js"></script>
@@ -54,7 +57,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         var grid;
         var loader;
         var columns = [];
-        var PAGESIZE = 65779;
+        var PAGESIZE = 50;
         var columnWidth = 350;
         var options = {
             enableCellNavigation: false,
@@ -66,6 +69,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             topPanelHeight: 25,
             rowHeight: 24
         };
+        var loadingIndicator;
 
         loader = new udb.DataLoader(65779, PAGESIZE);
 
@@ -77,10 +81,13 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
                 grid = new Slick.Grid("#myGrid", loader.data, [], options);
 
+                loader.onDataLoading.subscribe(function (e, args) {
+                    if (!loadingIndicator) {
+                        var g = $("#myGrid");
+                        loadingIndicator = $("<div class='loading-indicator'><label>loading</label></div>").appendTo(g);
+                    }
 
-                loader.onDataLoading.subscribe(function () {
-                    // TODO... show spinner.
-                    console.log('loading...');
+                    loadingIndicator.show();
                 });
 
 
@@ -91,8 +98,12 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                     }
                     grid.updateRowCount(); // uses data.length
                     grid.render();
-                    //TODO: hide spinner.
-                    console.log('loaded');
+
+                    loadingIndicator.fadeOut();
+                });
+
+                loader.onPageLoading.subscribe(function (e, args) {
+                    console.log("Page loading: " + args.from + " to " + args.to);
                 });
 
 

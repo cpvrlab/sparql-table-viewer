@@ -15,6 +15,7 @@
             orderBy: "",
             limit: ""
         };
+
         // events
         var onDataLoading = new Slick.Event();
         var onDataLoaded = new Slick.Event();
@@ -42,10 +43,10 @@
             if (to > data.length - 1) {
                 to = data.length - 1;
             }
-            onDataLoading.notify({ from: from, to: to });
 
             var fromPage = Math.floor(from / pageSize);
             var toPage = Math.floor(to / pageSize);
+
 
             for (var page = fromPage; page <= toPage; page++) {
                 if (pagesToLoad[page] == undefined) {
@@ -58,6 +59,8 @@
                 if (pagesToLoad[page] == null) {
                     console.log('loading a page');
                     onPageLoading.notify({ page: page });
+                    onDataLoading.notify({ from: from, to: to });
+                    setLimit(page, pageSize);
                     loaderFunction.call(self, page);
                 }
             }
