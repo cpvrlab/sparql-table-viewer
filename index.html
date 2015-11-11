@@ -56,9 +56,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     <div id="myGrid" style="width:90%;height:490px;"></div>
     </table>
 
-    <a href="http://test.lindas-data.ch/sparql?query=PREFIX%20rdf%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0APREFIX%20rdfs%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0APREFIX%20u28%3A%20%3Chttp%3A%2F%2Fenvironment.data.admin.ch%2Fubd%2F28%2F%3E%0A%0ASELECT%20%3Fstation%20%3Fpollutant%20%3Faggregation%20%3Fyear%20%20%3Fmeasurement%20%3Funit%20WHERE%20%7B%0A%20%20%20%20%3Fm%20a%20%3Chttp%3A%2F%2Fexample.org%2FMeasurement%3E%20.%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fmeasurement%3E%20%3Fmeasurement.%0A%20%20%20%20%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Faggregation%3E%20%3Fa.%0A%20%20%20%20%3Fa%20%20rdfs%3Alabel%20%3Faggregation.%0A%20%20%20%20FILTER%20(lang(%3Faggregation)%20%3D%20%27de%27)%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fstation%3E%20%3Fs.%0A%20%20%20%20%3Fs%20rdfs%3Alabel%20%3Fstation.%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Funit%3E%20%3Fu.%0A%20%20%20%20%3Fu%20rdfs%3Alabel%20%3Funit.%0A%20%20%20%20FILTER%20(lang(%3Funit)%20%3D%20%27de%27)%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fpollutant%3E%20%3Fp.%0A%20%20%20%20%3Fp%20rdfs%3Alabel%20%3Fpollutant.%0A%20%20%20%20FILTER%20(lang(%3Fpollutant)%20%3D%20%27de%27)%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fyear%3E%20%3Fy%0A%20%20%20%20BIND(SUBSTR(xsd%3Astring(%3Fy)%2C46)%20AS%20%3Fyear)%0A%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20LIMIT%2050%20OFFSET%200" download>Click here to download</a>
-    <a href="#" id="test">test</a>
-
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery-1.7.min.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery.event.drag-2.2.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery-ui-1.8.16.custom.min.js"></script>
