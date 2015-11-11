@@ -130,6 +130,11 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 console.log("sort called");
             });
 
+            loader.onRowCountChanged.subscribe(function(e, args) {
+                grid.updateRowCount();
+                grid.render();
+            });
+
 
             loader.onColumnsChanged.subscribe(function (e, columns) {
                 grid.setColumns(columns);

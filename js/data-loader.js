@@ -23,6 +23,7 @@
         var onDataLoading = new Slick.Event();
         var onDataLoaded = new Slick.Event();
         var onColumnsChanged = new Slick.Event();
+        var onRowCountChanged = new Slick.Event();
 
         function clear() {
             for (var key in data) {
@@ -108,6 +109,8 @@
                     totalCount = parseInt(resp.results.bindings[0]["count"]["value"]);                    
                     data.length = totalCount;
                     console.log("counted " + totalCount + " rows");
+
+                    onRowCountChanged.notify({ count: totalCount });
 
                     if (complete)
                         complete();
@@ -224,7 +227,8 @@
             // events
             "onDataLoading": onDataLoading,
             "onDataLoaded": onDataLoaded,
-            "onColumnsChanged": onColumnsChanged
+            "onColumnsChanged": onColumnsChanged,
+            "onRowCountChanged": onRowCountChanged
         };
     }
 
