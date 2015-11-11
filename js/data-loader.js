@@ -76,7 +76,9 @@
             // probably better to change later to a sparql parser https://github.com/RubenVerborgh/SPARQL.js
             var re = /.*(PREFIX|BASE).*\n/g; 
             var prologue;
+            sparqlQuery.prologue = "";
             sparqlQuery.query = query
+                
             while ((prologue = re.exec(query)) !== null) {
                 sparqlQuery.prologue += prologue[0] ;
                 sparqlQuery.query = sparqlQuery.query.replace(prologue[0], '');
