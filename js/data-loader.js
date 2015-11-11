@@ -12,8 +12,10 @@
         // bundle individual sparql query parts in an object for now
         var sparqlQuery = {
             query: "",
+            prologue: "",
             orderBy: "",
-            limit: ""
+            preLimit: "SELECT * WHERE {",
+            postLimit: "\n}"
         };
 
         // events
@@ -69,14 +71,22 @@
         }
 
         function setQuery(query) {
-            sparqlQuery.query = query;
-
+            // extract the prologue from the query (PREFIX|BASE)
+            // probably better to change later to a sparql parser https://github.com/RubenVerborgh/SPARQL.js
+            var re = /.*(PREFIX|BASE).*\n/g; 
+            var prologue;
+            sparqlQuery.query = query
+            while ((prologue = re.exec(query)) !== null) {
+                sparqlQuery.prologue += prologue[0] ;
+                sparqlQuery.query = sparqlQuery.query.replace(prologue[0], '');
+            }
+            
             // make sure our total count is still correct
             updateTotalCount();
         }
 
         function setLimit(page, limit) {
-            sparqlQuery.limit = "LIMIT " + limit + " OFFSET " + (page * limit);
+            sparqlQuery.postLimit = "\n} LIMIT " + limit + " OFFSET " + (page * limit);
         }
 
         function updateTotalCount()
@@ -115,12 +125,17 @@
             return result;
         }
 
+        function compileQueryURL() {
+            var queryString = sparqlQuery.prologue + sparqlQuery.preLimit + sparqlQuery.query + sparqlQuery.orderBy + sparqlQuery.postLimit;
+            var result = endPoint + "?query=" + encodeURIComponent(queryString);
+            return result;
+        }
+
         // todo: use a better solution once we remove the 
         //       sparql query editor. We won't need to parse the query
         //       then, because we will likely save the different parts
         //       of the query individually.
-        function compileCountQueryURL()
-        {
+        function compileCountQueryURL() {
             var queryString = sparqlQuery.query;
             var regex = /SELECT(.*)WHERE/;
             queryString = queryString.replace(regex, "SELECT COUNT(*) as ?count WHERE");
@@ -128,7 +143,6 @@
             var result = endPoint + "?query=" + encodeURIComponent(queryString);
             return result;
         }
-
 
         function loaderFunction(page) {
             // our sparql pages are 1-based.
