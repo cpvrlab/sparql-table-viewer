@@ -14,7 +14,7 @@
         // temporary filter test data
         filters.push({ column: "?year", values: [{ comperator: ">", value: "1990" }, { comperator: "<", value: "1985" }] });
         //filters.push({ column: "?year", values: [{ comperator: "<", value: "1990" }] });
-        filters.push({ column: "?station", values: [{ comperator: "=", value: "Zürich-Kaserne" }] });
+        filters.push({ column: "?station", values: [{ comperator: "=", value: "Jungfraujoch" }] });
         filters.push({ column: "STR(?pollutant)", values: [{ comperator: "=", value: "Gesamtstaub" }] });
         
         // bundle individual sparql query parts in an object for now
@@ -212,9 +212,8 @@
         }
 
         function compileCountQueryURL() {
-            var countSelect = "SELECT COUNT(*) as ?count WHERE";
-            
-            var result = endPoint + "?query=" + encodeURIComponent(compileSparqlQuery({}, {outerSelect: countSelect}));
+            var query = compileSparqlQuery({}, { outerSelect: "SELECT COUNT(*) as ?count WHERE" });
+            var result = endPoint + "?query=" + encodeURIComponent(query);
             return result;
         }
 
