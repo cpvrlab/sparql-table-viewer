@@ -80,8 +80,16 @@
             sparqlQuery.limit = "LIMIT " + limit + " OFFSET " + (page * limit);
         }
 
-        function compileQueryURL() {
-            var queryString = sparqlQuery.query + sparqlQuery.orderBy + sparqlQuery.limit;
+        function compileQueryURL(useSort, useLimit) {
+            useSort = typeof useSort !== 'undefined' ? useSort : true;
+            useLimit = typeof useLimit !== 'undefined' ? useLimit : true;
+
+            var queryString = sparqlQuery.query;
+            if (useSort)
+                queryString += sparqlQuery.orderBy;
+            if (useLimit)
+                queryString += sparqlQuery.limit;
+
             var result = endPoint + "?query=" + encodeURIComponent(queryString);
             console.log("building query: " + sparqlQuery.query);
             return result;
@@ -166,6 +174,7 @@
             "setSort": setSort,
             "setQuery": setQuery,
             "setLimit": setLimit,
+            "compileQueryURL": compileQueryURL, // we temporarily expose this function to have the simple download functionality.
 
             // events
             "onDataLoading": onDataLoading,

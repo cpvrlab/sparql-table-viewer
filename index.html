@@ -7,7 +7,8 @@
 </head>
 <body>
     <form>
-        <textarea id="query" style="width:90%;height:130px;padding:0;font-family:monospace">
+        <fieldset>
+            <textarea id="query" style="width:90%;height:130px;padding:0;font-family:monospace">
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX u28: <http://environment.data.admin.ch/ubd/28/>
@@ -34,17 +35,30 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     ?m <http://example.org/year> ?y
     BIND(SUBSTR(xsd:string(?y),46) AS ?year)
 }
-        </textarea>
-        <br />
-        <input id="run-query" type="button" value="run sparql" />
-
-        <br /><br />
+            </textarea>
+            <br />
+            <label>Download as: </label>
+            <select id="download-format" id="format" onchange="format_change(this)">
+                <option value="text/html" selected="selected">HTML</option>
+                <option value="application/vnd.ms-excel">Spreadsheet</option>
+                <option value="application/sparql-results+xml">XML</option>
+                <option value="application/sparql-results+json">JSON</option>
+                <option value="application/javascript">Javascript</option>
+                <option value="text/turtle">Turtle</option>
+                <option value="application/rdf+xml">RDF/XML</option>
+                <option value="text/plain">N-Triples</option>
+                <option value="text/csv">CSV</option>
+                <option value="text/tab-separated-values">TSV</option>
+            </select>
+            <input id="download-submit" type="button" value="Download" />
+            <br />
+            <input id="run-query" type="button" value="Run Query" />        
+        </fieldset>
     </form>
-    <div id="myGrid" style="width:90%;height:490px;">
-
-        <div><label>test</label></div>
-    </div>
+    <div id="myGrid" style="width:90%;height:490px;"></div>
     </table>
+
+    <a href="http://test.lindas-data.ch/sparql?query=PREFIX%20rdf%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0APREFIX%20rdfs%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0APREFIX%20u28%3A%20%3Chttp%3A%2F%2Fenvironment.data.admin.ch%2Fubd%2F28%2F%3E%0A%0ASELECT%20%3Fstation%20%3Fpollutant%20%3Faggregation%20%3Fyear%20%20%3Fmeasurement%20%3Funit%20WHERE%20%7B%0A%20%20%20%20%3Fm%20a%20%3Chttp%3A%2F%2Fexample.org%2FMeasurement%3E%20.%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fmeasurement%3E%20%3Fmeasurement.%0A%20%20%20%20%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Faggregation%3E%20%3Fa.%0A%20%20%20%20%3Fa%20%20rdfs%3Alabel%20%3Faggregation.%0A%20%20%20%20FILTER%20(lang(%3Faggregation)%20%3D%20%27de%27)%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fstation%3E%20%3Fs.%0A%20%20%20%20%3Fs%20rdfs%3Alabel%20%3Fstation.%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Funit%3E%20%3Fu.%0A%20%20%20%20%3Fu%20rdfs%3Alabel%20%3Funit.%0A%20%20%20%20FILTER%20(lang(%3Funit)%20%3D%20%27de%27)%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fpollutant%3E%20%3Fp.%0A%20%20%20%20%3Fp%20rdfs%3Alabel%20%3Fpollutant.%0A%20%20%20%20FILTER%20(lang(%3Fpollutant)%20%3D%20%27de%27)%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fyear%3E%20%3Fy%0A%20%20%20%20BIND(SUBSTR(xsd%3Astring(%3Fy)%2C46)%20AS%20%3Fyear)%0A%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20LIMIT%2050%20OFFSET%200" download>Click here to download</a>
 
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery-1.7.min.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery.event.drag-2.2.js"></script>
@@ -70,6 +84,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             rowHeight: 24
         };
         var loadingIndicator;
+        var downloadURL;
 
         loader = new udb.DataLoader(65779, PAGESIZE);
 
@@ -143,6 +158,29 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 loader.clear();
                 var vp = grid.getViewport();
                 loader.ensureData(vp.top, vp.bottom);
+
+                // set the download 
+                setDownloadUrl();
+            });
+            
+
+            // todo: with the current download solution user experience might suffer.
+            //       load times are high and it would be better if the user got feedback
+            //       about the download progress through a spinner etc.
+            function setDownloadUrl()
+            {
+                console.log("&format=" + encodeURIComponent($("#download-format option:selected").val()));
+                var url = loader.compileQueryURL(true, false) + "&format=" + $("#download-format option:selected").val();
+                downloadURL = url;
+            }
+
+            $('#download-format').change(function (e) {
+                setDownloadUrl();
+            });
+
+            $('#download-submit').click(function (e) {
+                console.log("download: " + downloadURL);
+                window.location = downloadURL;
             });
         });
     </script>
