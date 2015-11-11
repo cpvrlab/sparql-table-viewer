@@ -182,10 +182,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 window.location = downloadURL;
             });
 
-            // temp check query building
-            loader.setQuery($("#query").val());
-            loader.compileSparqlQuery({}, { outerSelect: "COUNT(*) as ?count WHERE" });
-
         });
     </script>
     

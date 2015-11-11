@@ -12,11 +12,11 @@
         var filters = []; // {column: "pollutant", comperator: "=", literal: "O3"} 
 
         // temporary filter test data
-        filters.push({ column: "year", comperator: ">", literal: "1990" });
-        filters.push({ column: "year", comperator: "<", literal: "1993" });
-        filters.push({ column: "station ", comperator: "=", literal: "Zürich-Kaserne" });
-        //filters.push({ column: "station", comperator: "=", literal: "Zürich-Kaserne" });
-
+        filters.push({ column: "?year", values: [{ comperator: ">", value: "1990" }, { comperator: "<", value: "1985" }] });
+        //filters.push({ column: "?year", values: [{ comperator: "<", value: "1990" }] });
+        filters.push({ column: "?station", values: [{ comperator: "=", value: "Zürich-Kaserne" }] });
+        filters.push({ column: "STR(?pollutant)", values: [{ comperator: "=", value: "Gesamtstaub" }] });
+        
         // bundle individual sparql query parts in an object for now
         var sparqlQuery = {
             prologue: "",
@@ -157,15 +157,14 @@
         function compileSparqlQuery(options, queryObject)
         {
             if (typeof options === 'undefined')
-                options = {}
+                options = {};
+            if (typeof queryObject == 'undefined')
+                queryObject = {};
 
             options.useSort = defaultValue(options.useSort, true);
             options.useLimit = defaultValue(options.useLimit, true);
             options.useFilters = defaultValue(options.useFilters, true);
-            
-            console.log("options: " + options.useFilters);
 
-            queryObject = sparqlQuery;
             queryObject.prologue = defaultValue(queryObject.prologue, sparqlQuery.prologue);
             queryObject.outerSelect = defaultValue(queryObject.outerSelect, sparqlQuery.outerSelect);
             queryObject.query = defaultValue(queryObject.query, sparqlQuery.query);
@@ -176,45 +175,46 @@
 
             var filterString = "";
             if (options.useFilters) {
-                console.log(filters);
-                $.each(filters, function (i, val) {
-                    filterString += "FILTER(?" +
-                        val.column + " " +
-                        val.comperator + " " +
-                        "\"" + val.literal + "\")\n";
+                $.each(filters, function (i, filter) {
+                    filterString += "FILTER(";
+                    
+                    $.each(filter.values, function (i, val) {
+                        filterString +=
+                            filter.column + " " +
+                            val.comperator + " " +
+                            "\"" + val.value + "\"";
+
+                        if (i < (filter.values.length - 1))
+                            filterString += " || ";
+                    });
+
+                    filterString += ")\n";
                 });
             }
 
             var queryString =
                 queryObject.prologue +
                 queryObject.outerSelect +
-                "{{\n" + // inner filter block around the main select query
+                "\n{\n{" + // inner filter block around the main select query
                 queryObject.query +
                 queryObject.orderBy +
-                "}\n" + // inner filter block END
+                "\n}\n" + // inner filter block END
                 filterString + // todo: replace with sparql query property
                 "}\n" + // outer select block END
                 queryObject.limit;
 
-            console.log(queryString);
-
             return queryString;
         }
         
-        function compileQueryURL(useSort, useLimit) {
-            useSort = typeof useSort !== 'undefined' ? useSort : true;
-            useLimit = typeof useLimit !== 'undefined' ? useLimit : true;
-
-            var result = endPoint + "?query=" + encodeURIComponent(compileSparqlQuery(useSort, useLimit, true));
+        function compileQueryURL(options) {
+            var result = endPoint + "?query=" + encodeURIComponent(compileSparqlQuery(options));
             return result;
         }
 
         function compileCountQueryURL() {
-            var preCount = "SELECT COUNT(*) as ?count WHERE {";
-            var postCount = "}\n"
-            var queryString = sparqlQuery.prologue + preCount + sparqlQuery.query + postCount;
-
-            var result = endPoint + "?query=" + encodeURIComponent(queryString);
+            var countSelect = "SELECT COUNT(*) as ?count WHERE";
+            
+            var result = endPoint + "?query=" + encodeURIComponent(compileSparqlQuery({}, {outerSelect: countSelect}));
             return result;
         }
 
@@ -296,7 +296,6 @@
             "setLimit": setLimit,
             "compileQueryURL": compileQueryURL, // we temporarily expose this function to have the simple download functionality.
             "compileCountQueryURL": compileCountQueryURL,
-            "compileSparqlQuery": compileSparqlQuery, //temp
 
             // events
             "onDataLoading": onDataLoading,
