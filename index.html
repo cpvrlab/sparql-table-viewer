@@ -81,89 +81,89 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         };
         var loadingIndicator;
         var downloadURL;
+        var viewportChangedTimer;
 
-        loader = new udb.DataLoader(50, PAGESIZE);
+        loader = new udb.DataLoader(PAGESIZE);
+        grid = new Slick.Grid("#myGrid", loader.data, [], options);
 
         $(function () {
+            loader.onDataLoading.subscribe(function (e, args) {
+                if (!loadingIndicator) {
+                    var g = $("#myGrid");
+                    loadingIndicator = $("<div class='loading-indicator'><label>loading</label></div>").appendTo(g);
+                }
+
+                loadingIndicator.show();
+            });
 
 
-            function initGridAndLoader() {
-                columns = [];
-                loadingIndicator = null;
+            loader.onDataLoaded.subscribe(function (e, args) {
+                console.log("data loaded from " + args.from + " to " + args.to);
+                for (var i = args.from; i <= args.to; i++) {
+                    grid.invalidateRow(i); // causes the appropriate rows to redraw.
+                }
+                grid.updateRowCount(); // uses data.length
+                grid.render();
 
-                grid = new Slick.Grid("#myGrid", loader.data, [], options);
-
-                loader.onDataLoading.subscribe(function (e, args) {
-                    if (!loadingIndicator) {
-                        var g = $("#myGrid");
-                        loadingIndicator = $("<div class='loading-indicator'><label>loading</label></div>").appendTo(g);
-                    }
-
-                    loadingIndicator.show();
-                });
-
-
-                loader.onDataLoaded.subscribe(function (e, args) {
-                    console.log("data loaded from " + args.from + " to " + args.to);
-                    for (var i = args.from; i <= args.to; i++) {
-                        grid.invalidateRow(i); // causes the appropriate rows to redraw.
-                    }
-                    grid.updateRowCount(); // uses data.length
-                    grid.render();
-
-                    loadingIndicator.fadeOut();
-                });
-
-                var viewportChangedTimer;
-
-                grid.onViewportChanged.subscribe(function (e, args) {
-                    console.log('viewport changed');
-                    clearTimeout(viewportChangedTimer);
-                    // only fire this every 1/4 sec at most.
-                    viewportChangedTimer = setTimeout(function () {
-                        var vp = grid.getViewport();
-                        loader.ensureData(vp.top, vp.bottom);
-                    }, 250);
-                });
-
-                grid.onSort.subscribe(function (e, args) {
-                    loader.setSort(args.sortCol.field, args.sortAsc);
-                    var vp = grid.getViewport();
-                    loader.clear();
-                    loader.ensureData(vp.top, vp.bottom);
-
-                    console.log("sort called");
-                });
-
-                loader.onColumnsChanged.subscribe(function (e, columns) {
-                    grid.setColumns(columns);
-                    var columnNames = "";
-                    for (var col in columns)
-                        columnNames += col.name + " ";
-                    console.log("set columns to: " + columnNames);
-                });
-
-            }
-
-            initGridAndLoader();
-            $("#run-query").click(function (e) {
-                loader.setQuery($("#query").val());
-                initGridAndLoader();
-                loader.clear();
-                var vp = grid.getViewport();
-                loader.ensureData(vp.top, vp.bottom);
-
-                // set the download 
-                setDownloadUrl();
+                loadingIndicator.fadeOut();
             });
             
+
+            var viewportChangedTimer;
+            grid.onViewportChanged.subscribe(function (e, args) {
+                console.log('viewport changed');
+                clearTimeout(viewportChangedTimer);
+                // only fire this every 1/4 sec at most.
+                viewportChangedTimer = setTimeout(function () {
+                    var vp = grid.getViewport();
+                    loader.ensureData(vp.top, vp.bottom);
+                }, 250);
+            });
+
+
+            grid.onSort.subscribe(function (e, args) {
+                loader.setSort(args.sortCol.field, args.sortAsc);
+                var vp = grid.getViewport();
+                loader.clear();
+                loader.ensureData(vp.top, vp.bottom);
+
+                console.log("sort called");
+            });
+
+
+            loader.onColumnsChanged.subscribe(function (e, columns) {
+                grid.setColumns(columns);
+                var columnNames = "";
+                for (var col in columns)
+                    columnNames += col.name + " ";
+                console.log("set columns to: " + columnNames);
+            });
+
+            
+
+            $("#run-query").click(function (e) {
+                // clear all rows
+                grid.invalidateAllRows();
+                var vp = grid.getViewport();
+                // clear loader data
+                loader.clear();
+                // set a new query (this creates an actual count query request for row count)
+                loader.setQuery($("#query").val(), function () {
+                    // ensure data after we have the correct row count
+                    console.log("data.length: " + loader.data.length);
+                    loader.ensureData(vp.top, vp.bottom);
+                });
+
+                // set the download url based on the new query information
+                // todo: add a better and more user friendly download solution
+                setDownloadUrl();
+            });            
 
             // todo: with the current download solution user experience might suffer.
             //       load times are high and it would be better if the user got feedback
             //       about the download progress through a spinner etc.
             function setDownloadUrl()
             {
-                console.log("&format=" + encodeURIComponent($("#download-format option:selected").val()));
                 var url = loader.compileQueryURL(true, false) + "&format=" + $("#download-format option:selected").val();
                 downloadURL = url;
             }
@@ -175,11 +175,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             $('#download-submit').click(function (e) {
                 console.log("download: " + downloadURL);
                 window.location = downloadURL;
-            });
-
-            $('#test').click(function (e) {
-                loader.compileCountQueryURL();
-                return false;
             });
         });
     </script>

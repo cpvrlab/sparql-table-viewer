@@ -1,9 +1,10 @@
 (function ($) {
 
-    function DataLoader(totalCount, pageSize) {
+    function DataLoader(pageSize) {
 
         var self = this;
         var pageSize = pageSize;
+        var totalCount = 40;
         var data = { length: 0 }; // the data rows, which we'll fill in, plus an extra property for total length
         var pagesToLoad = {};
         var columns = [];
@@ -70,7 +71,7 @@
             sparqlQuery.orderBy = "ORDER BY " + ((sortAsc) ? "ASC" : "DESC") + "(?" + field + ")";
         }
 
-        function setQuery(query) {
+        function setQuery(query, complete) {
             // extract the prologue from the query (PREFIX|BASE)
             // probably better to change later to a sparql parser https://github.com/RubenVerborgh/SPARQL.js
             var re = /.*(PREFIX|BASE).*\n/g; 
@@ -82,14 +83,14 @@
             }
             
             // make sure our total count is still correct
-            updateTotalCount();
+            updateTotalCount(complete);
         }
 
         function setLimit(page, limit) {
             sparqlQuery.postLimit = "\n} LIMIT " + limit + " OFFSET " + (page * limit);
         }
 
-        function updateTotalCount()
+        function updateTotalCount(complete)
         {
             var url = compileCountQueryURL();
             var req = $.ajax({
@@ -105,29 +106,27 @@
                     totalCount = parseInt(resp.results.bindings[0]["count"]["value"]);                    
                     data.length = totalCount;
                     console.log("counted " + totalCount + " rows");
+
+                    if (complete)
+                        complete();
                 },
                 error: function () {
                     console.log("error retrieving count query results");
                 }
             });
         }
-
+        
         function compileQueryURL(useSort, useLimit) {
             useSort = typeof useSort !== 'undefined' ? useSort : true;
             useLimit = typeof useLimit !== 'undefined' ? useLimit : true;
 
-            var queryString = sparqlQuery.query;
-            if (useSort)
-                queryString += sparqlQuery.orderBy;
-            if (useLimit)
-                queryString += sparqlQuery.limit;
+            var queryString = 
+                sparqlQuery.prologue +
+                ((useLimit) ? sparqlQuery.preLimit : "") +
+                sparqlQuery.query +
+                ((useSort) ? sparqlQuery.orderBy : "") +
+                ((useLimit) ? sparqlQuery.postLimit : "");
 
-            var result = endPoint + "?query=" + encodeURIComponent(queryString);
-            return result;
-        }
-
-        function compileQueryURL() {
-            var queryString = sparqlQuery.prologue + sparqlQuery.preLimit + sparqlQuery.query + sparqlQuery.orderBy + sparqlQuery.postLimit;
             var result = endPoint + "?query=" + encodeURIComponent(queryString);
             return result;
         }
