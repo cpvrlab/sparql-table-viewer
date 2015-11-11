@@ -12,8 +12,10 @@
         // bundle individual sparql query parts in an object for now
         var sparqlQuery = {
             query: "",
+            prologue: "",
             orderBy: "",
-            limit: ""
+            preLimit: "SELECT * WHERE {",
+            postLimit: "}"
         };
 
         // events
@@ -73,15 +75,24 @@
         }
 
         function setQuery(query) {
-            sparqlQuery.query = query;
+            // extract the prologue from the query (PREFIX|BASE)
+            // probably better to change later to a sparql parser https://github.com/RubenVerborgh/SPARQL.js
+            var re = /.*(PREFIX|BASE).*/g; 
+            var prologue;
+            sparqlQuery.query = query
+            while ((prologue = re.exec(query)) !== null) {
+                sparqlQuery.prologue += prologue[0] + '\n';
+                sparqlQuery.query = sparqlQuery.query.replace(prologue[0], '');
+            }
+            
         }
 
         function setLimit(page, limit) {
-            sparqlQuery.limit = "LIMIT " + limit + " OFFSET " + (page * limit);
+            sparqlQuery.postLimit = "} LIMIT " + limit + " OFFSET " + (page * limit);
         }
 
         function compileQueryURL() {
-            var queryString = sparqlQuery.query + sparqlQuery.orderBy + sparqlQuery.limit;
+            var queryString = sparqlQuery.prologue + sparqlQuery.preLimit + sparqlQuery.query + sparqlQuery.orderBy + sparqlQuery.postLimit;
             var result = endPoint + "?query=" + encodeURIComponent(queryString);
             console.log("building query: " + sparqlQuery.query);
             return result;
