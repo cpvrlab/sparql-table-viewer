@@ -38,7 +38,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             </textarea>
             <br />
             <label>Download as: </label>
-            <select id="download-format" id="format" onchange="format_change(this)">
+            <select id="download-format" id="format">
                 <option value="text/html" selected="selected">HTML</option>
                 <option value="application/vnd.ms-excel">Spreadsheet</option>
                 <option value="application/sparql-results+xml">XML</option>
@@ -59,6 +59,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     </table>
 
     <a href="http://test.lindas-data.ch/sparql?query=PREFIX%20rdf%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0APREFIX%20rdfs%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0APREFIX%20u28%3A%20%3Chttp%3A%2F%2Fenvironment.data.admin.ch%2Fubd%2F28%2F%3E%0A%0ASELECT%20%3Fstation%20%3Fpollutant%20%3Faggregation%20%3Fyear%20%20%3Fmeasurement%20%3Funit%20WHERE%20%7B%0A%20%20%20%20%3Fm%20a%20%3Chttp%3A%2F%2Fexample.org%2FMeasurement%3E%20.%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fmeasurement%3E%20%3Fmeasurement.%0A%20%20%20%20%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Faggregation%3E%20%3Fa.%0A%20%20%20%20%3Fa%20%20rdfs%3Alabel%20%3Faggregation.%0A%20%20%20%20FILTER%20(lang(%3Faggregation)%20%3D%20%27de%27)%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fstation%3E%20%3Fs.%0A%20%20%20%20%3Fs%20rdfs%3Alabel%20%3Fstation.%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Funit%3E%20%3Fu.%0A%20%20%20%20%3Fu%20rdfs%3Alabel%20%3Funit.%0A%20%20%20%20FILTER%20(lang(%3Funit)%20%3D%20%27de%27)%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fpollutant%3E%20%3Fp.%0A%20%20%20%20%3Fp%20rdfs%3Alabel%20%3Fpollutant.%0A%20%20%20%20FILTER%20(lang(%3Fpollutant)%20%3D%20%27de%27)%0A%0A%20%20%20%20%3Fm%20%3Chttp%3A%2F%2Fexample.org%2Fyear%3E%20%3Fy%0A%20%20%20%20BIND(SUBSTR(xsd%3Astring(%3Fy)%2C46)%20AS%20%3Fyear)%0A%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20LIMIT%2050%20OFFSET%200" download>Click here to download</a>
+    <a href="#" id="test">test</a>
 
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery-1.7.min.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery.event.drag-2.2.js"></script>
@@ -86,13 +87,14 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         var loadingIndicator;
         var downloadURL;
 
-        loader = new udb.DataLoader(65779, PAGESIZE);
+        loader = new udb.DataLoader(50, PAGESIZE);
 
         $(function () {
 
 
             function initGridAndLoader() {
                 columns = [];
+                loadingIndicator = null;
 
                 grid = new Slick.Grid("#myGrid", loader.data, [], options);
 
@@ -107,7 +109,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
 
                 loader.onDataLoaded.subscribe(function (e, args) {
-                    console.log(args);
+                    console.log("data loaded from " + args.from + " to " + args.to);
                     for (var i = args.from; i <= args.to; i++) {
                         grid.invalidateRow(i); // causes the appropriate rows to redraw.
                     }
@@ -116,14 +118,8 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
                     loadingIndicator.fadeOut();
                 });
-
-                loader.onPageLoading.subscribe(function (e, args) {
-                    console.log("Page loading: " + args.from + " to " + args.to);
-                });
-
-
+                
                 var viewportChangedTimer;
-
 
                 grid.onViewportChanged.subscribe(function (e, args) {
                     console.log('viewport changed');
@@ -146,7 +142,10 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
                 loader.onColumnsChanged.subscribe(function (e, columns) {
                     grid.setColumns(columns);
-                    console.log("set columns to: " + columns);
+                    var columnNames = "";
+                    for (var col in columns)
+                        columnNames += col.name + " ";
+                    console.log("set columns to: " + columnNames);
                 });
 
             }
@@ -181,6 +180,11 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             $('#download-submit').click(function (e) {
                 console.log("download: " + downloadURL);
                 window.location = downloadURL;
+            });
+
+            $('#test').click(function (e) {
+                loader.compileCountQueryURL();
+                return false;
             });
         });
     </script>

@@ -19,8 +19,6 @@
         // events
         var onDataLoading = new Slick.Event();
         var onDataLoaded = new Slick.Event();
-        var onPageLoading = new Slick.Event();
-        var onPageLoaded = new Slick.Event();
         var onColumnsChanged = new Slick.Event();
 
         function clear() {
@@ -57,8 +55,6 @@
             // do a bunch of queries to get the data for the range.
             for (var page = fromPage; page <= toPage; page++) {
                 if (pagesToLoad[page] == null) {
-                    console.log('loading a page');
-                    onPageLoading.notify({ page: page });
                     onDataLoading.notify({ from: from, to: to });
                     setLimit(page, pageSize);
                     loaderFunction.call(self, page);
@@ -74,10 +70,35 @@
 
         function setQuery(query) {
             sparqlQuery.query = query;
+
+            // make sure our total count is still correct
+            updateTotalCount();
         }
 
         function setLimit(page, limit) {
             sparqlQuery.limit = "LIMIT " + limit + " OFFSET " + (page * limit);
+        }
+
+        function updateTotalCount()
+        {
+            var url = compileCountQueryURL();
+            var req = $.ajax({
+                dataType: "json",
+                type: "GET",
+                url: url,
+                callbackParameter: "callback",
+                Accept: "application/sparql-results+json",
+                cache: true,
+                success: function (resp, textStatus, jqXHR) {
+                    // the count query should always return with just one row and one column
+                    // so our count result should be at 0 0
+                    totalCount = parseInt(resp.results.bindings[0]["count"]["value"]);                    
+                    data.length = totalCount;
+                },
+                error: function () {
+                    console.log("error retrieving count query results");
+                }
+            });
         }
 
         function compileQueryURL(useSort, useLimit) {
@@ -91,7 +112,20 @@
                 queryString += sparqlQuery.limit;
 
             var result = endPoint + "?query=" + encodeURIComponent(queryString);
-            console.log("building query: " + sparqlQuery.query);
+            return result;
+        }
+
+        // todo: use a better solution once we remove the 
+        //       sparql query editor. We won't need to parse the query
+        //       then, because we will likely save the different parts
+        //       of the query individually.
+        function compileCountQueryURL()
+        {
+            var queryString = sparqlQuery.query;
+            var regex = /SELECT(.*)WHERE/;
+            queryString = queryString.replace(regex, "SELECT COUNT(*) as ?count WHERE");
+
+            var result = endPoint + "?query=" + encodeURIComponent(queryString);
             return result;
         }
 
@@ -112,7 +146,7 @@
                     console.log('error loading page ' + page.toString());
                 }
             });
-            req.page = page; // ad a property onto teh jqXHR obj
+            req.page = page;
         }
 
         function ajaxSuccess(responseData, textStatus, jqXHR) {
@@ -155,8 +189,6 @@
                 // assign the row of results;
                 data[thisPageFrom + i] = rows[i];
             }
-
-            onPageLoaded.notify({ page: page });
             onDataLoaded.notify({ from: thisPageFrom, to: thisPageTo });
 
         }
@@ -175,12 +207,11 @@
             "setQuery": setQuery,
             "setLimit": setLimit,
             "compileQueryURL": compileQueryURL, // we temporarily expose this function to have the simple download functionality.
+            "compileCountQueryURL": compileCountQueryURL,
 
             // events
             "onDataLoading": onDataLoading,
             "onDataLoaded": onDataLoaded,
-            "onPageLoading": onPageLoading,
-            "onPageLoaded": onPageLoaded,
             "onColumnsChanged": onColumnsChanged
         };
     }
