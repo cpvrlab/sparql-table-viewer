@@ -33,8 +33,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
     ?m <http://example.org/year> ?y
     BIND(SUBSTR(xsd:string(?y),46) AS ?year)
-}
-        </textarea>
+}</textarea>
         <br />
         <input id="run-query" type="button" value="run sparql" />
 

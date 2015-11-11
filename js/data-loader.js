@@ -15,7 +15,7 @@
             prologue: "",
             orderBy: "",
             preLimit: "SELECT * WHERE {",
-            postLimit: "}"
+            postLimit: "\n}"
         };
 
         // events
@@ -77,18 +77,18 @@
         function setQuery(query) {
             // extract the prologue from the query (PREFIX|BASE)
             // probably better to change later to a sparql parser https://github.com/RubenVerborgh/SPARQL.js
-            var re = /.*(PREFIX|BASE).*/g; 
+            var re = /.*(PREFIX|BASE).*\n/g; 
             var prologue;
             sparqlQuery.query = query
             while ((prologue = re.exec(query)) !== null) {
-                sparqlQuery.prologue += prologue[0] + '\n';
+                sparqlQuery.prologue += prologue[0] ;
                 sparqlQuery.query = sparqlQuery.query.replace(prologue[0], '');
             }
             
         }
 
         function setLimit(page, limit) {
-            sparqlQuery.postLimit = "} LIMIT " + limit + " OFFSET " + (page * limit);
+            sparqlQuery.postLimit = "\n} LIMIT " + limit + " OFFSET " + (page * limit);
         }
 
         function compileQueryURL() {
