@@ -104,6 +104,7 @@
                     // so our count result should be at 0 0
                     totalCount = parseInt(resp.results.bindings[0]["count"]["value"]);                    
                     data.length = totalCount;
+                    console.log("counted " + totalCount + " rows");
                 },
                 error: function () {
                     console.log("error retrieving count query results");
@@ -131,14 +132,10 @@
             return result;
         }
 
-        // todo: use a better solution once we remove the 
-        //       sparql query editor. We won't need to parse the query
-        //       then, because we will likely save the different parts
-        //       of the query individually.
         function compileCountQueryURL() {
-            var queryString = sparqlQuery.query;
-            var regex = /SELECT(.*)WHERE/;
-            queryString = queryString.replace(regex, "SELECT COUNT(*) as ?count WHERE");
+            var preCount = "SELECT COUNT(*) as ?count WHERE {";
+            var postCount = "}\n"
+            var queryString = sparqlQuery.prologue + preCount + sparqlQuery.query + postCount;
 
             var result = endPoint + "?query=" + encodeURIComponent(queryString);
             return result;
