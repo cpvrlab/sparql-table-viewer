@@ -169,7 +169,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             //       about the download progress through a spinner etc.
             function setDownloadUrl()
             {
-                var url = loader.compileQueryURL(true, false) + "&format=" + $("#download-format option:selected").val();
+                var url = loader.compileQueryURL({useLimit: false}) + "&format=" + $("#download-format option:selected").val();
                 downloadURL = url;
             }
 
