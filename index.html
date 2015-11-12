@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="lib/SlickGrid/slick.grid.css" type="text/css" />
     <link rel="stylesheet" href="lib/SlickGrid/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css" />
     <link rel="stylesheet" href="sparql-table-viewer.css" type="text/css" />
+        
 </head>
 <body>
     <form>
@@ -52,7 +53,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         </select>
         <input id="download-submit" type="button" value="Download" />
         <br />
-        <textarea id="query-edit" style="height: 100px;width:90%;padding:0;font-family:monospace" disabled>hi
+        <textarea id="query-edit" style="display:none; height: 100px;width:90%;padding:0;font-family:monospace" disabled>hi
             hi
             hi
             hi</textarea>
@@ -62,13 +63,35 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
     </form>
     <div id="myGrid" style="width:90%;height:490px;"></div>
+    
 
-    <script type="text/javascript" src="lib/SlickGrid/lib/jquery-1.7.min.js"></script>
+    <script type="text/javascript" src="lib/jQuery/jquery-1.11.3.min.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery.event.drag-2.2.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery-ui-1.8.16.custom.min.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/slick.core.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/slick.grid.js"></script>
+    <script type="text/javascript" src="lib/jquery-dropdown/jquery.dropdown.js"></script>
     <script type="text/javascript" src="js/data-loader.js"></script>
+
+    <div class="dropdown-container bfu-filter-dropdown">
+        <span><a href="#" data-jq-dropdown="#jq-dropdown-3" class="bfu-filter-dropdown">asdsadsa</a></span>
+    </div>
+
+    <div id="jq-dropdown-3" class="jq-dropdown jq-dropdown-scroll jq-dropdown-anchor-right">
+        <ul class="jq-dropdown-menu">
+            <li><label><input type="checkbox" /> Checkbox 1</label></li>
+            <li><label><input type="checkbox" /> Checkbox 2</label></li>
+            <li><label><input type="checkbox" /> Checkbox 3</label></li>
+            <li><label><input type="checkbox" /> Checkbox 4</label></li>
+            <li><label><input type="checkbox" /> Checkbox 5</label></li>
+            <li><label><input type="checkbox" /> Checkbox 6</label></li>
+            <li><label><input type="checkbox" /> Checkbox 7</label></li>
+            <li><label><input type="checkbox" /> Checkbox 8</label></li>
+            <li><label><input type="checkbox" /> Checkbox 9</label></li>
+        </ul>
+    </div>
+
+    
     <script type="text/javascript">
 	// demo js
         var grid;
@@ -83,8 +106,8 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             enableAddRow: true,
             asyncEditorLoading: true,
             forceFitColumns: true,
-            topPanelHeight: 25,
-            rowHeight: 48
+            topPanelHeight: 20,
+            rowHeight: 20
         };
         var loadingIndicator;
         var downloadURL;
@@ -94,8 +117,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         grid = new Slick.Grid("#myGrid", loader.data, [], options);
 
         $(function () {
-            $("#query-edit").hide();
-
             loader.onDataLoading.subscribe(function (e, args) {
                 if (!loadingIndicator) {
                     var g = $("#myGrid");
@@ -117,8 +138,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 updateEditTextbox();
 
                 loadingIndicator.fadeOut();
-            });
-            
+            });            
 
             var viewportChangedTimer;
             grid.onViewportChanged.subscribe(function (e, args) {
@@ -154,7 +174,24 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 console.log("set columns to: " + columnNames);
             });
 
-            
+            grid.onHeaderCellRendered.subscribe(function (e, args) {
+                $(args.headerNode).empty();
+                // todo: a bit much to dynamically append, there is probably a much more elegant solution to this
+                var filterMenu =
+                    '<div class="dropdown-container bfu-filter-dropdown">' +
+                    '    <span><a href="#" data-jq-dropdown="#jq-dropdown-3" class="bfu-filter-dropdown" data-horizontal-offset="4" data-vertical-offset="4"></a></span>'
+                    '</div>"';
+                    
+                $(filterMenu).appendTo(args.node);
+            });
+
+            grid.onHeaderRowCellRendered.subscribe(function (e, args) {
+                $(args.node).empty();
+                $("<input type='text'>")
+                   .data("columnId", args.column.id)
+                   .val(columnFilters[args.column.id])
+                   .appendTo(args.node);
+            });
 
             $("#run-query").click(function (e) {
                 // clear all rows
@@ -187,8 +224,9 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 updateEditTextbox();
                 $("#query-edit").slideToggle();
             });
+            
         });
     </script>
-    
+
 </body>
 </html>

@@ -277,7 +277,6 @@
                 data[thisPageFrom + i] = rows[i];
             }
             onDataLoaded.notify({ from: thisPageFrom, to: thisPageTo });
-
         }
 
         // public api.
