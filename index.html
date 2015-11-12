@@ -4,13 +4,13 @@
     <link rel="stylesheet" href="lib/SlickGrid/slick.grid.css" type="text/css" />
     <link rel="stylesheet" href="lib/SlickGrid/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css" />
     <link rel="stylesheet" href="sparql-table-viewer.css" type="text/css" />
-        
+    <link rel="stylesheet" href="lib/CodeMirror/codemirror.css">
 </head>
 <body>
     <form>
         <label>temporary dev query editor</label>
         <br />
-        <textarea id="query" style="width:90%;height:130px;padding:0;font-family:monospace">
+        <textarea id="query">
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX u28: <http://environment.data.admin.ch/ubd/28/>
@@ -38,38 +38,40 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     BIND(SUBSTR(xsd:string(?y),46) AS ?year)
 }</textarea>
         <br />
-        <label>Download as: </label>
+            <label>Download as: </label>
         <select id="download-format">
-            <option value="text/html" selected="selected">HTML</option>
-            <option value="application/vnd.ms-excel">Spreadsheet</option>
-            <option value="application/sparql-results+xml">XML</option>
-            <option value="application/sparql-results+json">JSON</option>
-            <option value="application/javascript">Javascript</option>
-            <option value="text/turtle">Turtle</option>
-            <option value="application/rdf+xml">RDF/XML</option>
-            <option value="text/plain">N-Triples</option>
-            <option value="text/csv">CSV</option>
-            <option value="text/tab-separated-values">TSV</option>
-        </select>
-        <input id="download-submit" type="button" value="Download" />
-        <br />
+                <option value="text/html" selected="selected">HTML</option>
+                <option value="application/vnd.ms-excel">Spreadsheet</option>
+                <option value="application/sparql-results+xml">XML</option>
+                <option value="application/sparql-results+json">JSON</option>
+                <option value="application/javascript">Javascript</option>
+                <option value="text/turtle">Turtle</option>
+                <option value="application/rdf+xml">RDF/XML</option>
+                <option value="text/plain">N-Triples</option>
+                <option value="text/csv">CSV</option>
+                <option value="text/tab-separated-values">TSV</option>
+            </select>
+            <input id="download-submit" type="button" value="Download" />
+            <br />
         <textarea id="query-edit" style="display:none; height: 100px;width:90%;padding:0;font-family:monospace" disabled>hi
             hi
             hi
             hi</textarea>
         <br /><a id="toggle-query-edit" href="#">toggle query edit</a>
         <br /><br />
-        <input id="run-query" type="button" value="Run Query" />        
+            <input id="run-query" type="button" value="Run Query" />        
 
     </form>
     <div id="myGrid" style="width:90%;height:490px;"></div>
-    
+
 
     <script type="text/javascript" src="lib/jQuery/jquery-1.11.3.min.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery.event.drag-2.2.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery-ui-1.8.16.custom.min.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/slick.core.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/slick.grid.js"></script>
+    <script type="text/javascript" src="lib/CodeMirror/codemirror.js"></script>
+    <script type="text/javascript" src="lib/CodeMirror/mode/sparql/sparql.js"></script>
     <script type="text/javascript" src="lib/jquery-dropdown/jquery.dropdown.js"></script>
     <script type="text/javascript" src="js/data-loader.js"></script>
 
@@ -93,6 +95,12 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
     
     <script type="text/javascript">
+        //code mirror
+        var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("query"), {
+                lineNumbers: true,
+                mode: "sparql"
+            });
+
 	// demo js
         var grid;
         var loader;
@@ -138,8 +146,8 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 updateEditTextbox();
 
                 loadingIndicator.fadeOut();
-            });            
-
+            });
+            
             var viewportChangedTimer;
             grid.onViewportChanged.subscribe(function (e, args) {
                 console.log('viewport changed');
@@ -181,7 +189,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                     '<div class="dropdown-container bfu-filter-dropdown">' +
                     '    <span><a href="#" data-jq-dropdown="#jq-dropdown-3" class="bfu-filter-dropdown" data-horizontal-offset="4" data-vertical-offset="4"></a></span>'
                     '</div>"';
-                    
+            
                 $(filterMenu).appendTo(args.node);
             });
 
@@ -212,7 +220,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
                 console.log("download: " + url);
                 window.location = downloadURL;
-            });
+            });            
 
             // update the query textbox with the new text
             function updateEditTextbox()
@@ -224,9 +232,9 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 updateEditTextbox();
                 $("#query-edit").slideToggle();
             });
-            
+
         });
     </script>
-
+    
 </body>
 </html>
