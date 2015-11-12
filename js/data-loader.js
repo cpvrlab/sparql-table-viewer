@@ -295,6 +295,7 @@
             "setLimit": setLimit,
             "compileQueryURL": compileQueryURL, // we temporarily expose this function to have the simple download functionality.
             "compileCountQueryURL": compileCountQueryURL,
+            "compileSparqlQuery": compileSparqlQuery,
 
             // events
             "onDataLoading": onDataLoading,

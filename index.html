@@ -7,6 +7,8 @@
 </head>
 <body>
     <form>
+        <label>temporary dev query editor</label>
+        <br />
         <textarea id="query" style="width:90%;height:130px;padding:0;font-family:monospace">
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -35,26 +37,31 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     BIND(SUBSTR(xsd:string(?y),46) AS ?year)
 }</textarea>
         <br />
-            <label>Download as: </label>
-            <select id="download-format" id="format">
-                <option value="text/html" selected="selected">HTML</option>
-                <option value="application/vnd.ms-excel">Spreadsheet</option>
-                <option value="application/sparql-results+xml">XML</option>
-                <option value="application/sparql-results+json">JSON</option>
-                <option value="application/javascript">Javascript</option>
-                <option value="text/turtle">Turtle</option>
-                <option value="application/rdf+xml">RDF/XML</option>
-                <option value="text/plain">N-Triples</option>
-                <option value="text/csv">CSV</option>
-                <option value="text/tab-separated-values">TSV</option>
-            </select>
-            <input id="download-submit" type="button" value="Download" />
-            <br />
-            <input id="run-query" type="button" value="Run Query" />        
+        <label>Download as: </label>
+        <select id="download-format">
+            <option value="text/html" selected="selected">HTML</option>
+            <option value="application/vnd.ms-excel">Spreadsheet</option>
+            <option value="application/sparql-results+xml">XML</option>
+            <option value="application/sparql-results+json">JSON</option>
+            <option value="application/javascript">Javascript</option>
+            <option value="text/turtle">Turtle</option>
+            <option value="application/rdf+xml">RDF/XML</option>
+            <option value="text/plain">N-Triples</option>
+            <option value="text/csv">CSV</option>
+            <option value="text/tab-separated-values">TSV</option>
+        </select>
+        <input id="download-submit" type="button" value="Download" />
+        <br />
+        <textarea id="query-edit" style="height: 100px;width:90%;padding:0;font-family:monospace" disabled>hi
+            hi
+            hi
+            hi</textarea>
+        <br /><a id="toggle-query-edit" href="#">toggle query edit</a>
+        <br /><br />
+        <input id="run-query" type="button" value="Run Query" />        
 
     </form>
     <div id="myGrid" style="width:90%;height:490px;"></div>
-    </table>
 
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery-1.7.min.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery.event.drag-2.2.js"></script>
@@ -70,14 +77,14 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         var PAGESIZE = 1000;
         var columnWidth = 350;
         var options = {
-            enableCellNavigation: false,
-            enableColumnReorder: true,
+            enableCellNavigation: true,
+            enableColumnReorder: false,
             syncColumnCellResize: true,
             enableAddRow: true,
             asyncEditorLoading: true,
             forceFitColumns: true,
             topPanelHeight: 25,
-            rowHeight: 24
+            rowHeight: 48
         };
         var loadingIndicator;
         var downloadURL;
@@ -87,6 +94,8 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         grid = new Slick.Grid("#myGrid", loader.data, [], options);
 
         $(function () {
+            $("#query-edit").hide();
+
             loader.onDataLoading.subscribe(function (e, args) {
                 if (!loadingIndicator) {
                     var g = $("#myGrid");
@@ -96,7 +105,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 loadingIndicator.show();
             });
 
-
             loader.onDataLoaded.subscribe(function (e, args) {
                 console.log("data loaded from " + args.from + " to " + args.to);
                 for (var i = args.from; i <= args.to; i++) {
@@ -104,6 +112,9 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 }
                 grid.updateRowCount(); // uses data.length
                 grid.render();
+
+                // update query textbox
+                updateEditTextbox();
 
                 loadingIndicator.fadeOut();
             });
@@ -126,7 +137,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 var vp = grid.getViewport();
                 loader.clear();
                 loader.ensureData(vp.top, vp.bottom);
-
                 console.log("sort called");
             });
 
@@ -158,30 +168,25 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                     console.log("data.length: " + loader.data.length);
                     loader.ensureData(vp.top, vp.bottom);
                 });
-
-                // set the download url based on the new query information
-                // todo: add a better and more user friendly download solution
-                setDownloadUrl();
             });            
 
-            // todo: with the current download solution user experience might suffer.
-            //       load times are high and it would be better if the user got feedback
-            //       about the download progress through a spinner etc.
-            function setDownloadUrl()
-            {
-                var url = loader.compileQueryURL({useLimit: false}) + "&format=" + $("#download-format option:selected").val();
-                downloadURL = url;
-            }
-
-            $('#download-format').change(function (e) {
-                setDownloadUrl();
-            });
-
             $('#download-submit').click(function (e) {
-                console.log("download: " + downloadURL);
+                var url = loader.compileQueryURL({ useLimit: false }) + "&format=" + $("#download-format option:selected").val();
+
+                console.log("download: " + url);
                 window.location = downloadURL;
             });
 
+            // update the query textbox with the new text
+            function updateEditTextbox()
+            {
+                $("#query-edit").val(loader.compileSparqlQuery({ useLimit: false }));
+            };
+
+            $("#toggle-query-edit").on("click", function () {
+                updateEditTextbox();
+                $("#query-edit").slideToggle();
+            });
         });
     </script>
     
