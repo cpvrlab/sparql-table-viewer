@@ -4,10 +4,11 @@
     <link rel="stylesheet" href="lib/SlickGrid/slick.grid.css" type="text/css" />
     <link rel="stylesheet" href="lib/SlickGrid/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css" />
     <link rel="stylesheet" href="sparql-table-viewer.css" type="text/css" />
+    <link rel="stylesheet" href="lib/CodeMirror/codemirror.css">
 </head>
 <body>
     <form>
-        <textarea id="query" style="width:90%;height:130px;padding:0;font-family:monospace">
+        <textarea id="query">
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX u28: <http://environment.data.admin.ch/ubd/28/>
@@ -61,9 +62,17 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery-ui-1.8.16.custom.min.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/slick.core.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/slick.grid.js"></script>
+    <script type="text/javascript" src="lib/CodeMirror/codemirror.js"></script>
+    <script type="text/javascript" src="lib/CodeMirror/mode/sparql/sparql.js"></script>
     <script type="text/javascript" src="js/data-loader.js"></script>
     <script type="text/javascript">
-	// demo js
+        //code mirror
+        var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("query"), {
+                lineNumbers: true,
+                mode: "sparql"
+            });
+
+        // demo js
         var grid;
         var loader;
         var columns = [];

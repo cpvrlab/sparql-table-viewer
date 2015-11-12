@@ -12,10 +12,6 @@
         var filters = []; // {column: "pollutant", comperator: "=", literal: "O3"} 
 
         // temporary filter test data
-        filters.push({ column: "?year", values: [{ comperator: ">", value: "1990" }, { comperator: "<", value: "1985" }] });
-        //filters.push({ column: "?year", values: [{ comperator: "<", value: "1990" }] });
-        filters.push({ column: "?station", values: [{ comperator: "=", value: "Jungfraujoch" }] });
-        filters.push({ column: "STR(?pollutant)", values: [{ comperator: "=", value: "Gesamtstaub" }] });
         
         // bundle individual sparql query parts in an object for now
         var sparqlQuery = {
