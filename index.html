@@ -8,9 +8,10 @@
 </head>
 <body>
     <form>
-        <label>temporary dev query editor</label>
-        <br />
-        <textarea id="query">
+        <div>
+            <label>temporary dev query editor</label>
+            <br />
+            <textarea id="query">
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX u28: <http://environment.data.admin.ch/ubd/28/>
@@ -37,6 +38,11 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     ?m <http://example.org/year> ?y
     BIND(SUBSTR(xsd:string(?y),46) AS ?year)
 }</textarea>
+            </div>
+        <div>
+            <textarea id="query-edit" style="display:none; height: 100px;width:90%;padding:0;font-family:monospace" disabled></textarea>
+        </div>
+            <br /><a id="toggle-query-edit" href="#">toggle query edit</a>
         <br />
             <label>Download as: </label>
         <select id="download-format">
@@ -53,8 +59,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             </select>
             <input id="download-submit" type="button" value="Download" />
             <br />
-        <textarea id="query-edit" style="display:none; height: 100px;width:90%;padding:0;font-family:monospace" disabled></textarea>
-        <br /><a id="toggle-query-edit" href="#">toggle query edit</a>
         <br /><br />
             <input id="run-query" type="button" value="Run Query" />        
 
@@ -80,9 +84,16 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     <script type="text/javascript">
         // code mirror
         var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("query"), {
-                lineNumbers: true,
-                mode: "sparql"
-            });
+            lineNumbers: true,
+            mode: "sparql"
+        });
+        /*
+        var generatedQueryEditor = CodeMirror.fromTextArea(document.getElementById("query-edit"), {
+            lineNumbers: true,
+            mode: "sparql"
+        });*/
+
+        
 
 	    // demo js
         var grid;
@@ -236,6 +247,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 console.log(filters);
                 loader.setFilters(filters);
                 
+                // scroll to top to make sure there's data in our viewport
                 grid.scrollRowToTop(0);
                 var vp = grid.getViewport();
                 loader.clearData();

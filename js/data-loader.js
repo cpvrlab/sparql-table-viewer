@@ -135,11 +135,12 @@
                     orderBy: "ORDER BY ASC(?" + col.id + ")"
                 };
 
-                var url = compileQueryURL({ useLimit: false }, queryObject);
+                var queryString = compileSparqlQuery({ useLimit: false }, queryObject);
                 var req = $.ajax({
                     dataType: "json",
-                    type: "GET",
-                    url: url,
+                    type: "POST",
+                    data: { query: queryString },
+                    url: endPoint,
                     callbackParameter: "callback",
                     Accept: "application/sparql-results+json",
                     cache: true,
@@ -160,12 +161,12 @@
 
         function updateTotalCount(complete)
         {
-            var url = compileCountQueryURL();
-            console.log("count url: " + url);
+            var queryString = compileSparqlQuery({ useLimit: false }, { outerSelect: "SELECT COUNT(*) as ?count WHERE" });
             var req = $.ajax({
                 dataType: "json",
-                type: "GET",
-                url: url,
+                type: "POST",
+                data: { query: queryString },
+                url: endPoint,
                 callbackParameter: "callback",
                 Accept: "application/sparql-results+json",
                 cache: true,
@@ -239,22 +240,16 @@
             var result = endPoint + "?query=" + encodeURIComponent(compileSparqlQuery(options, queryObject));
             return result;
         }
-
-        function compileCountQueryURL() {
-            var query = compileSparqlQuery({useLimit: false}, { outerSelect: "SELECT COUNT(*) as ?count WHERE" });
-            var result = endPoint + "?query=" + encodeURIComponent(query);
-            return result;
-        }
-
+        
         function loaderFunction(page) {
             // our sparql pages are 1-based.
+            var queryString = compileSparqlQuery();
             var sparqlPage = page + 1
-            var url = compileQueryURL();
-            console.log("loaded url: " + url);
             var req = $.ajax({
                 dataType: 'json',
-                type: 'GET',
-                url: url,
+                type: 'POST',
+                data: { query: queryString },
+                url: endPoint,
                 callbackParameter: "callback",
                 Accept: 'application/sparql-results+json',
                 cache: true,
@@ -329,7 +324,6 @@
             "setLimit": setLimit,
             "setFilters": setFilters,
             "compileQueryURL": compileQueryURL, // we temporarily expose this function to have the simple download functionality.
-            "compileCountQueryURL": compileCountQueryURL,
             "compileSparqlQuery": compileSparqlQuery,
             "updateTotalCount": updateTotalCount,
 
