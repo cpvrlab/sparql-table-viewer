@@ -161,6 +161,7 @@
         function updateTotalCount(complete)
         {
             var url = compileCountQueryURL();
+            console.log("count url: " + url);
             var req = $.ajax({
                 dataType: "json",
                 type: "GET",
@@ -240,7 +241,7 @@
         }
 
         function compileCountQueryURL() {
-            var query = compileSparqlQuery({}, { outerSelect: "SELECT COUNT(*) as ?count WHERE" });
+            var query = compileSparqlQuery({useLimit: false}, { outerSelect: "SELECT COUNT(*) as ?count WHERE" });
             var result = endPoint + "?query=" + encodeURIComponent(query);
             return result;
         }

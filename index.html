@@ -236,6 +236,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 console.log(filters);
                 loader.setFilters(filters);
                 
+                grid.scrollRowToTop(0);
                 var vp = grid.getViewport();
                 loader.clearData();
                 loader.updateTotalCount(function () { loader.ensureData(vp.top, vp.bottom) });
