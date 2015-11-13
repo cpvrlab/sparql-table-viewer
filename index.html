@@ -173,6 +173,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             });
 
             loader.onFilterValuesRetrieved.subscribe(function (e, args) {
+                console.log("Loaded filter values for " + args.column);
                 var selector = "#jq-dropdown-" + args.column + " .jq-dropdown-menu";
 
                 // clear the current filter content
@@ -214,7 +215,24 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                     '        loading...' + // todo: add spinner here
                     '    </ul>' +
                     '</div>').appendTo(container);
+                    
+                    // note: workaround for this: http://stackoverflow.com/a/643664
+                    var testFunc = (function (columnId) {
+                        return function () {
+
+                            // attach a callback to the just created dropdown to receive list data
+                            // only after it's been opened for the first time
+                            // note: we use .one here, this is a callback that runs once and then detaches
+                            // itself. jQuery, yey.
+                            $("#jq-dropdown-" + columns[col].id).one("show", function () {
+                                loader.requestFilterData(columnId);
+                            });
+
+                        }
+                    })(columns[col].id);
+                    testFunc();
                 }
+
             });
 
             grid.onHeaderCellRendered.subscribe(function (e, args) {

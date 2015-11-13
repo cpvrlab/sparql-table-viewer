@@ -174,42 +174,37 @@
             });                      
         }
 
-
-        function updateFilterValues()
+        function requestFilterData(columnId)
         {
-            $.each(columns, function (i, col) {
-                col.id;
-                filterRequestStatus[col.id] = false;
+            console.log("requested filters for " + columnId);
+            var queryObject = {
+                outerSelect: "SELECT DISTINCT(?" + columnId + ") WHERE",
+                orderBy: "ORDER BY ASC(?" + columnId + ")"
+            };
 
-                var queryObject = {
-                    outerSelect: "SELECT DISTINCT(?" + col.id + ") WHERE",
-                    orderBy: "ORDER BY ASC(?" + col.id + ")"
-                };
+            var queryString = compileSparqlQuery({ useLimit: false }, queryObject);
+            var req = $.ajax({
+                dataType: "json",
+                type: "POST",
+                data: { query: queryString },
+                url: endPoint,
+                callbackParameter: "callback",
+                Accept: "application/sparql-results+json",
+                cache: true,
+                success: function (resp, textStatus, jqXHR) {
+                    var vals = [];
+                    $.each(resp.results.bindings, function (i, binding) {
+                        vals.push(binding[columnId].value);
+                    });
 
-                var queryString = compileSparqlQuery({ useLimit: false }, queryObject);
-                var req = $.ajax({
-                    dataType: "json",
-                    type: "POST",
-                    data: { query: queryString },
-                    url: endPoint,
-                    callbackParameter: "callback",
-                    Accept: "application/sparql-results+json",
-                    cache: true,
-                    success: function (resp, textStatus, jqXHR) {
-                        var vals = [];
-                        $.each(resp.results.bindings, function (i, binding) {
-                            vals.push(binding[col.id].value);
-                        });
+                    // update our local version of distinct values for this col
+                    distinctValues[columnId] = vals;
 
-                        // update our local version of distinct values for this col
-                        distinctValues[col.id] = vals;
-
-                        onFilterValuesRetrieved.notify({column: col.id, values: vals});
-                    },
-                    error: function () {
-                        console.log("error retrieving filter values");
-                    }
-                });
+                    onFilterValuesRetrieved.notify({ column: columnId, values: vals });
+                },
+                error: function () {
+                    console.log("error retrieving filter values");
+                }
             });
         }
 
@@ -330,11 +325,7 @@
                     columns.push({ id: col, name: col, field: col, sortable: true });
                     
                 });
-                onColumnsChanged.notify(columns);
-
-                // update filters
-                updateFilterValues();
-
+                onColumnsChanged.notify(columns);                
             }
             var page = jqXHR.page;
             var rowsData = [];
@@ -387,6 +378,7 @@
             "compileQueryURL": compileQueryURL, // we temporarily expose this function to have the simple download functionality.
             "compileSparqlQuery": compileSparqlQuery,
             "updateTotalCount": updateTotalCount,
+            "requestFilterData": requestFilterData,
 
             // events
             "onDataLoading": onDataLoading,
