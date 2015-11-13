@@ -45,30 +45,29 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 <h3>Generated Query (Read Only)</h3>
                 <textarea id="query-edit" style="height: 100px;width:90%;padding:0;font-family:monospace" disabled>hi</textarea>
             </div>
+
+            <div style="clear:both"></div>
+            <input id="run-query" type="button" value="Run Query" />
         </div>
-        <div style="clear:both"></div>
-        <br />
-        <label>Download as: </label>
-        <select id="download-format">
-            <option value="text/html" selected="selected">HTML</option>
-            <option value="application/vnd.ms-excel">Spreadsheet</option>
-            <option value="application/sparql-results+xml">XML</option>
-            <option value="application/sparql-results+json">JSON</option>
-            <option value="application/javascript">Javascript</option>
-            <option value="text/turtle">Turtle</option>
-            <option value="application/rdf+xml">RDF/XML</option>
-            <option value="text/plain">N-Triples</option>
-            <option value="text/csv">CSV</option>
-            <option value="text/tab-separated-values">TSV</option>
-        </select>
-        <input id="download-submit" type="button" value="Download" />
-        <br />
-        <br /><br />
-        <input id="run-query" type="button" value="Run Query" />
 
     </form>
 
     <div id="myGrid" style="width:90%;height:490px;"></div>
+    <br />
+    <label>Download as: </label>
+    <select id="download-format">
+        <option value="text/html" selected="selected">HTML</option>
+        <option value="application/vnd.ms-excel">Spreadsheet</option>
+        <option value="application/sparql-results+xml">XML</option>
+        <option value="application/sparql-results+json">JSON</option>
+        <option value="application/javascript">Javascript</option>
+        <option value="text/turtle">Turtle</option>
+        <option value="application/rdf+xml">RDF/XML</option>
+        <option value="text/plain">N-Triples</option>
+        <option value="text/csv">CSV</option>
+        <option value="text/tab-separated-values">TSV</option>
+    </select>
+    <input id="download-submit" type="button" value="Download" />
 
     <br />
 
@@ -263,7 +262,16 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 loader.updateTotalCount(function () { loader.ensureData(vp.top, vp.bottom) });
             });
 
+            // run query on page load
+            runQuery();
+
+            // run query on button press
             $("#run-query").click(function (e) {
+                runQuery();
+            });
+
+            function runQuery()
+            {
                 // clear all rows
                 grid.invalidateAllRows();
                 var vp = grid.getViewport();
@@ -276,7 +284,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                     console.log("data.length: " + loader.data.length);
                     loader.ensureData(vp.top, vp.bottom);
                 });
-            });
+            }
 
             $('#download-submit').click(function (e) {
                 var url = loader.compileQueryURL({ useLimit: false }) + "&format=" + $("#download-format option:selected").val();

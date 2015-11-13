@@ -173,3 +173,7 @@ div.loading-indicator label {
     color: inherit;
     cursor: pointer;
 }
+
+#run-query {
+    margin: 5px;
+}
