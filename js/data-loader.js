@@ -10,6 +10,7 @@
         var columns = [];
         var endPoint = "http://test.lindas-data.ch/sparql";
         var filters = []; // {column: "pollutant", comperator: "=", literal: "O3"} 
+        var filterRequestStatus = {};
 
         // temporary filter test data
         
@@ -28,6 +29,7 @@
         var onDataLoaded = new Slick.Event();
         var onColumnsChanged = new Slick.Event();
         var onRowCountChanged = new Slick.Event();
+        var onFilterValuesRetrieved = new Slick.Event();
 
         function clear() {
             for (var key in data) {
@@ -114,6 +116,45 @@
             filters = [];
         }
 
+        // gets possible filter values through a sparql distinct query
+        function getFilters()
+        {
+        }
+
+        function updateFilterValues()
+        {
+            $.each(columns, function (i, col) {
+                col.id;
+                filterRequestStatus[col.id] = false;
+
+                var queryObject = {
+                    outerSelect: "SELECT DISTINCT(?" + col.id + ") WHERE",
+                    orderBy: "ORDER BY ASC(?" + col.id + ")"
+                };
+
+                var url = compileQueryURL({ useLimit: false }, queryObject);
+                var req = $.ajax({
+                    dataType: "json",
+                    type: "GET",
+                    url: url,
+                    callbackParameter: "callback",
+                    Accept: "application/sparql-results+json",
+                    cache: true,
+                    success: function (resp, textStatus, jqXHR) {
+                        var vals = [];
+                        $.each(resp.results.bindings, function (i, binding) {
+                            vals.push(binding[col.id].value);
+                        });
+
+                        onFilterValuesRetrieved.notify({column: col.id, values: vals});
+                    },
+                    error: function () {
+                        console.log("error retrieving filter values");
+                    }
+                });
+            });
+        }
+
         function updateTotalCount(complete)
         {
             var url = compileCountQueryURL();
@@ -127,7 +168,7 @@
                 success: function (resp, textStatus, jqXHR) {
                     // the count query should always return with just one row and one column
                     // so our count result should be at 0 0
-                    totalCount = parseInt(resp.results.bindings[0]["count"]["value"]);                    
+                    totalCount = parseInt(resp.results.bindings[0]["count"]["value"]);
                     data.length = totalCount;
                     console.log("counted " + totalCount + " rows");
 
@@ -188,6 +229,11 @@
                 });
             }
 
+            if (!options.useLimit)
+                queryObject.limit = "";
+            if (!options.useSort)
+                queryObject.orderBy = "";
+
             var queryString =
                 queryObject.prologue +
                 queryObject.outerSelect +
@@ -202,8 +248,8 @@
             return queryString;
         }
         
-        function compileQueryURL(options) {
-            var result = endPoint + "?query=" + encodeURIComponent(compileSparqlQuery(options));
+        function compileQueryURL(options, queryObject) {
+            var result = endPoint + "?query=" + encodeURIComponent(compileSparqlQuery(options, queryObject));
             return result;
         }
 
@@ -241,6 +287,10 @@
                 });
 
                 onColumnsChanged.notify(columns);
+
+                // update filters
+                updateFilterValues();
+
             }
             var page = jqXHR.page;
             var rowsData = [];
@@ -296,7 +346,8 @@
             "onDataLoading": onDataLoading,
             "onDataLoaded": onDataLoaded,
             "onColumnsChanged": onColumnsChanged,
-            "onRowCountChanged": onRowCountChanged
+            "onRowCountChanged": onRowCountChanged,
+            "onFilterValuesRetrieved": onFilterValuesRetrieved
         };
     }
 

@@ -75,19 +75,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     <script type="text/javascript" src="lib/jquery-dropdown/jquery.dropdown.js"></script>
     <script type="text/javascript" src="js/data-loader.js"></script>
 
-
-    <div id="jq-dropdown-3" class="jq-dropdown jq-dropdown-scroll jq-dropdown-anchor-right">
-        <ul class="jq-dropdown-menu">
-            <li><label><input type="checkbox" /> Checkbox 1</label></li>
-            <li><label><input type="checkbox" /> Checkbox 2</label></li>
-            <li><label><input type="checkbox" /> Checkbox 3</label></li>
-            <li><label><input type="checkbox" /> Checkbox 4</label></li>
-            <li><label><input type="checkbox" /> Checkbox 5</label></li>
-            <li><label><input type="checkbox" /> Checkbox 6</label></li>
-            <li><label><input type="checkbox" /> Checkbox 7</label></li>
-            <li><label><input type="checkbox" /> Checkbox 8</label></li>
-            <li><label><input type="checkbox" /> Checkbox 9</label></li>
-        </ul>
+    <div id="filter-dropdown-container">
     </div>
 
     
@@ -170,23 +158,46 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 grid.render();
             });
 
+            loader.onFilterValuesRetrieved.subscribe(function (e, args) {
+                var selector = "#jq-dropdown-" + args.column + " .jq-dropdown-menu";
+
+                // clear the current filter content
+                $(selector).html("");
+
+                // fill it with new list of filters
+                for(var i in args.values) {
+                    $('<li><label><input type="checkbox" checked/>' + args.values[i] + '</label></li>')
+                        .appendTo(selector);
+                }
+            });
+
 
             loader.onColumnsChanged.subscribe(function (e, columns) {
                 grid.setColumns(columns);
-                var columnNames = "";
-                for (var col in columns)
-                    columnNames += col.name + " ";
-                console.log("set columns to: " + columnNames);
+
+                var container = "#filter-dropdown-container";
+
+                // clear all the current dropdowns
+                $(container).html("");
+
+                // add a dropdown for each column and initialize its content with a spinner     
+                for (var col in columns) {   
+                    $('<div id="jq-dropdown-' + columns[col].id + '" class="jq-dropdown jq-dropdown-scroll jq-dropdown-anchor-right">' +
+                    '    <ul class="jq-dropdown-menu">' +
+                    '        loading...' + // todo: add spinner here
+                    '    </ul>' +
+                    '</div>').appendTo(container);
+                }
             });
 
             grid.onHeaderCellRendered.subscribe(function (e, args) {
                 $(args.headerNode).empty();
+
                 // todo: a bit much to dynamically append, there is probably a much more elegant solution to this
                 var filterMenu =
                     '<div class="dropdown-container bfu-filter-dropdown">' +
-                    '    <span><a href="#" data-jq-dropdown="#jq-dropdown-3" class="bfu-filter-dropdown" data-horizontal-offset="4" data-vertical-offset="4"></a></span>'
+                    '    <span><a href="#" data-jq-dropdown="#jq-dropdown-' + args.column.id + '" class="bfu-filter-dropdown" data-horizontal-offset="4" data-vertical-offset="4"></a></span>'
                     '</div>"';
-            
                 $(filterMenu).appendTo(args.node);
             });
 
