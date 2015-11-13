@@ -53,15 +53,14 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             </select>
             <input id="download-submit" type="button" value="Download" />
             <br />
-        <textarea id="query-edit" style="display:none; height: 100px;width:90%;padding:0;font-family:monospace" disabled>hi
-            hi
-            hi
-            hi</textarea>
+        <textarea id="query-edit" style="display:none; height: 100px;width:90%;padding:0;font-family:monospace" disabled></textarea>
         <br /><a id="toggle-query-edit" href="#">toggle query edit</a>
         <br /><br />
             <input id="run-query" type="button" value="Run Query" />        
 
     </form>
+    <a href="#" id="test-link">SET CURRENT FILTERS AND LOAD DATA temporary test link</a>
+
     <div id="myGrid" style="width:90%;height:490px;"></div>
 
 
@@ -80,13 +79,13 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
     
     <script type="text/javascript">
-        //code mirror
+        // code mirror
         var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("query"), {
                 lineNumbers: true,
                 mode: "sparql"
             });
 
-	// demo js
+	    // demo js
         var grid;
         var loader;
         var columns = [];
@@ -148,7 +147,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             grid.onSort.subscribe(function (e, args) {
                 loader.setSort(args.sortCol.field, args.sortAsc);
                 var vp = grid.getViewport();
-                loader.clear();
+                loader.clearData();
                 loader.ensureData(vp.top, vp.bottom);
                 console.log("sort called");
             });
@@ -166,13 +165,14 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
                 // fill it with new list of filters
                 for(var i in args.values) {
-                    $('<li><label><input type="checkbox" checked/>' + args.values[i] + '</label></li>')
+                    $('<li><label><input type="checkbox" value="' + args.values[i] + '" checked/>' + args.values[i] + '</label></li>')
                         .appendTo(selector);
                 }
             });
 
-
             loader.onColumnsChanged.subscribe(function (e, columns) {
+                console.log("COLUMNS CHANGED!");
+                console.log(columns);
                 grid.setColumns(columns);
 
                 var container = "#filter-dropdown-container";
@@ -192,7 +192,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
             grid.onHeaderCellRendered.subscribe(function (e, args) {
                 $(args.headerNode).empty();
-
+                console.log("onHeaderCellRendered");
                 // todo: a bit much to dynamically append, there is probably a much more elegant solution to this
                 var filterMenu =
                     '<div class="dropdown-container bfu-filter-dropdown">' +
@@ -200,13 +200,34 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                     '</div>"';
                 $(filterMenu).appendTo(args.node);
             });
+            
+            // todo: rename function
+            $("#test-link").click(
+            function () {
+                var filters = {};
 
-            grid.onHeaderRowCellRendered.subscribe(function (e, args) {
-                $(args.node).empty();
-                $("<input type='text'>")
-                   .data("columnId", args.column.id)
-                   .val(columnFilters[args.column.id])
-                   .appendTo(args.node);
+                // go over each filter dropdown state
+                var columns = grid.getColumns();
+                for (var i in columns) {
+                    var values = [];
+
+                    var selector = "#jq-dropdown-" + columns[i].id + " .jq-dropdown-menu input:checkbox";
+                    $(selector).each(function () {
+                        if (!$(this).prop("checked"))
+                            values.push($(this).val());
+                    });
+
+                    if(values.length)
+                        filters[columns[i].id] = values;
+                }
+                console.log(filters);
+                loader.setFilters(filters);
+                
+                var vp = grid.getViewport();
+                loader.clearData();
+                loader.updateTotalCount(loader.ensureData(vp.top, vp.bottom));
+
+                return false;
             });
 
             $("#run-query").click(function (e) {
@@ -214,9 +235,10 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 grid.invalidateAllRows();
                 var vp = grid.getViewport();
                 // clear loader data
-                loader.clear();
+                loader.clearData();
+                loader.clearColumns();
                 // set a new query (this creates an actual count query request for row count)
-                loader.setQuery($("#query").val(), function () {
+                loader.setQuery(myCodeMirror.getValue(), function () {
                     // ensure data after we have the correct row count
                     console.log("data.length: " + loader.data.length);
                     loader.ensureData(vp.top, vp.bottom);
@@ -244,5 +266,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         });
     </script>
     
+
 </body>
 </html>

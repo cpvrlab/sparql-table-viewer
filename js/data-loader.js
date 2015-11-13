@@ -31,13 +31,16 @@
         var onRowCountChanged = new Slick.Event();
         var onFilterValuesRetrieved = new Slick.Event();
 
-        function clear() {
+        function clearData() {
             for (var key in data) {
                 delete data[key];
             }
             data.length = totalCount;
-            columns = [];
             pagesToLoad = {};
+        }
+
+        function clearColumns() {
+            columns = [];
         }
         
         // from and to are 0-based row indices.
@@ -90,7 +93,7 @@
                 sparqlQuery.prologue += prologue[0] ;
                 sparqlQuery.query = sparqlQuery.query.replace(prologue[0], '');
             }
-            
+                        
             // make sure our total count is still correct
             updateTotalCount(complete);
         }
@@ -100,26 +103,27 @@
         }
 
         /** Adds a new comparison filter to this loader. 
-        Note that we can only compare to literal values at the moment.
-
-        @param  column      
-        @param  comperator  string determining the comperator to use. (ex: >=)
-        @param  literal     lietal value to compare to
+        @param  filterObj   ex.: {station: [], measurement: [], ... }
         */
-        function addFilter(column, comperator, literal)
+        function setFilters(filters)
         {
-            filters.push({ "column": column, "comperator": comperator, "literal": literal });
+            sparqlQuery.filters = "";
+            $.each(filters, function (column, filterValues) {
+
+                sparqlQuery.filters += "FILTER(";
+
+                $.each(filterValues, function (i, val) {
+                    sparqlQuery.filters +=
+                        "STR(?" + column + ") != \"" + val + "\"";
+
+                    if (i < (filterValues.length - 1))
+                        sparqlQuery.filters += " && ";
+                });
+
+                sparqlQuery.filters += ")\n";
+            });                      
         }
 
-        function clearFilters()
-        {
-            filters = [];
-        }
-
-        // gets possible filter values through a sparql distinct query
-        function getFilters()
-        {
-        }
 
         function updateFilterValues()
         {
@@ -189,10 +193,9 @@
             return variable;
         }
 
-        // expects an object
-        // {outerSelect: "SELECT * WHERE", 
         function compileSparqlQuery(options, queryObject)
         {
+            // set default values
             if (typeof options === 'undefined')
                 options = {};
             if (typeof queryObject == 'undefined')
@@ -209,39 +212,23 @@
             queryObject.filters = defaultValue(queryObject.filters, sparqlQuery.filters);
             queryObject.limit = defaultValue(queryObject.limit, sparqlQuery.limit);
             
-
-            var filterString = "";
-            if (options.useFilters) {
-                $.each(filters, function (i, filter) {
-                    filterString += "FILTER(";
-                    
-                    $.each(filter.values, function (i, val) {
-                        filterString +=
-                            filter.column + " " +
-                            val.comperator + " " +
-                            "\"" + val.value + "\"";
-
-                        if (i < (filter.values.length - 1))
-                            filterString += " || ";
-                    });
-
-                    filterString += ")\n";
-                });
-            }
-
+            // check if we need limit, orderby or filters
             if (!options.useLimit)
                 queryObject.limit = "";
             if (!options.useSort)
                 queryObject.orderBy = "";
+            if (!options.useFilters)
+                queryObject.filters = "";
 
+            // build final query
             var queryString =
                 queryObject.prologue +
                 queryObject.outerSelect +
-                "\n{\n{" + // inner filter block around the main select query
+                "\n{\n{" + // inner filter block START
                 queryObject.query +
                 queryObject.orderBy +
                 "\n}\n" + // inner filter block END
-                filterString + // todo: replace with sparql query property
+                queryObject.filters +
                 "}\n" + // outer select block END
                 queryObject.limit;
 
@@ -263,6 +250,7 @@
             // our sparql pages are 1-based.
             var sparqlPage = page + 1
             var url = compileQueryURL();
+            console.log("loaded url: " + url);
             var req = $.ajax({
                 dataType: 'json',
                 type: 'GET',
@@ -284,8 +272,8 @@
                 var vars = responseData["head"]["vars"];
                 $.each(vars, function (i, col) {
                     columns.push({ id: col, name: col, field: col, sortable: true });
+                    
                 });
-
                 onColumnsChanged.notify(columns);
 
                 // update filters
@@ -332,15 +320,18 @@
             "sparqlQuery": sparqlQuery,
 
             // methods
-            "clear": clear,
+            "clearColumns": clearColumns,
+            "clearData": clearData,
             "ensureData": ensureData,
             "setPageOfData": setPageOfData,
             "setSort": setSort,
             "setQuery": setQuery,
             "setLimit": setLimit,
+            "setFilters": setFilters,
             "compileQueryURL": compileQueryURL, // we temporarily expose this function to have the simple download functionality.
             "compileCountQueryURL": compileCountQueryURL,
             "compileSparqlQuery": compileSparqlQuery,
+            "updateTotalCount": updateTotalCount,
 
             // events
             "onDataLoading": onDataLoading,
