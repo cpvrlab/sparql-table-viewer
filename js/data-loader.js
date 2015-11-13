@@ -161,6 +161,13 @@
 
         function updateTotalCount(complete)
         {
+            // todo: our event firing and exposing is a bit messy at the moment
+            //       for example we expose this function 'updateTotalCount' to the user
+            //       which is bad... mhhh k?
+            //       oh yea, I'm also calling onDataLoading here to let the user
+            //       know that we're doing something (counting rows) but it will get called
+            //       again in a sec when the actual data is being loaded... good or bad?
+            onDataLoading.notify();
             var queryString = compileSparqlQuery({ useLimit: false }, { outerSelect: "SELECT COUNT(*) as ?count WHERE" });
             var req = $.ajax({
                 dataType: "json",
