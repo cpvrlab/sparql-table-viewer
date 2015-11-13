@@ -239,15 +239,19 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 var columns = grid.getColumns();
                 for (var i in columns) {
                     var values = [];
+                    var selectedCount = 0;
 
                     var selector = "#jq-dropdown-" + columns[i].id + " .jq-dropdown-menu input:checkbox";
                     $(selector).not(".checkall").each(function () {
-                        if (!$(this).prop("checked"))
-                            values.push($(this).val());
+                        var selected = $(this).prop("checked");
+                        if (selected) 
+                            selectedCount++;
+                        
+                        
+                        values.push({ value: $(this).val(), isSelected: selected });
                     });
 
-                    if (values.length)
-                        filters[columns[i].id] = values;
+                    filters[columns[i].id] = { selectedLength: selectedCount, values: values};
                 }
                 console.log(filters);
                 loader.setFilters(filters);

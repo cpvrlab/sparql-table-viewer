@@ -11,6 +11,7 @@
         var endPoint = "http://test.lindas-data.ch/sparql";
         var filters = []; // {column: "pollutant", comperator: "=", literal: "O3"} 
         var filterRequestStatus = {};
+        var distinctValues = {}; // distinct column values: { "station" : ["Aarau", "Aargau"], ... }
 
         // temporary filter test data
         
@@ -106,17 +107,67 @@
         */
         function setFilters(filters)
         {
+            // we can optimize our filter query based on the selected amount
+            // of sort values.
+            // if only one value is selected we can just add FILTER(?column = "value")
+            // if all but one value is selected we can use FILTER(?column != "value")
+
+            
+
             sparqlQuery.filters = "";
             $.each(filters, function (column, filterValues) {
 
+                // continue if the filter has everything selected
+                console.log("deciding if I should skip: " + filterValues.selectedLength + " " + distinctValues[column].length);
+                if (filterValues.selectedLength == distinctValues[column].length) {
+                    console.log("skipping because all selected " + filterValues.selectedLength + " " + distinctValues[column].length);
+                    return true;
+                }
+
+                var lessSelectedValues = true;
+                // note: special case for 0 selected elements, then we force
+                //       a filter that looks like this FILTER(?column != "value" || ...)
+                //       so that we recieve a 0 result. 
+                // todo:    I'm unsure if we really need this since it is clear that 
+                //          we'll recieve a count of 0 and there will be nothing to 
+                //          display. I'll leave it in for now.
+                //          The other option would be to ignore the filter but that would
+                //          be strange behaviour..., so we'll leave it here I guess.
+                if (0.5 * distinctValues[column].length < filterValues.selectedLength
+                    || filterValues.selectedLength == 0) {
+                    lessSelectedValues = false;
+                }
+                console.log("less selected: " + lessSelectedValues);
+
                 sparqlQuery.filters += "FILTER(";
 
-                $.each(filterValues, function (i, val) {
-                    sparqlQuery.filters +=
-                        "STR(?" + column + ") != \"" + val + "\"";
+                var filterCounter = 0;
+                $.each(filterValues.values, function (i, val) {
+                    // skip if we don't need the current value for our filter
+                    if (lessSelectedValues && !val.isSelected ||
+                        !lessSelectedValues && val.isSelected)
+                        return true;
 
-                    if (i < (filterValues.length - 1))
-                        sparqlQuery.filters += " && ";
+                    // default connector and comperator if we're using unchecked values
+                    // then we want to filter with these two
+                    var connector = " && ";
+                    var comperator = " != "
+                    var isLastElement = filterCounter == (filterValues.values.length - filterValues.selectedLength - 1);
+                    if (lessSelectedValues) {
+                        // if however there are less selected values than unchecked ones
+                        // then we want to use the selected values for filtering
+                        connector = " || ";
+                        comperator = " = ";
+                        isLastElement = filterCounter == (filterValues.selectedLength - 1);
+                    }
+                    
+                    sparqlQuery.filters +=
+                        "STR(?" + column + ")" + comperator + "\"" + val.value + "\"";
+
+                    if (!isLastElement)
+                        sparqlQuery.filters += connector;
+
+                    filterCounter++;
                 });
 
                 sparqlQuery.filters += ")\n";
@@ -149,6 +200,9 @@
                         $.each(resp.results.bindings, function (i, binding) {
                             vals.push(binding[col.id].value);
                         });
+
+                        // update our local version of distinct values for this col
+                        distinctValues[col.id] = vals;
 
                         onFilterValuesRetrieved.notify({column: col.id, values: vals});
                     },
