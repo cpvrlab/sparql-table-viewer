@@ -45,7 +45,6 @@
         
         // from and to are 0-based row indices.
         function ensureData(from, to) {
-
             data.length = totalCount;
 
             if (from < 0) {

@@ -59,7 +59,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             <input id="run-query" type="button" value="Run Query" />        
 
     </form>
-    <a href="#" id="test-link">SET CURRENT FILTERS AND LOAD DATA temporary test link</a>
 
     <div id="myGrid" style="width:90%;height:490px;"></div>
 
@@ -163,11 +162,24 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 // clear the current filter content
                 $(selector).html("");
 
+                var html = "";
+
+                // add check all checkbox       
+                html += '<li><label><input type="checkbox" class="checkall" checked />Check all</label></li>';
+                html += '<li class="jq-dropdown-divider"></li>';
+
                 // fill it with new list of filters
                 for(var i in args.values) {
-                    $('<li><label><input type="checkbox" value="' + args.values[i] + '" checked/>' + args.values[i] + '</label></li>')
-                        .appendTo(selector);
+                    html += '<li><label><input type="checkbox" value="' + args.values[i] + '" checked/>' + args.values[i] + '</label></li>';
                 }
+
+                $(selector).append(html);
+
+                // add check all functionality
+                $(selector).on("change", ".checkall", function()
+                {
+                    $(selector + " input:checkbox").not(this).prop("checked", this.checked);
+                });
             });
 
             loader.onColumnsChanged.subscribe(function (e, columns) {
@@ -181,7 +193,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 $(container).html("");
 
                 // add a dropdown for each column and initialize its content with a spinner     
-                for (var col in columns) {   
+                for (var col in columns) {
                     $('<div id="jq-dropdown-' + columns[col].id + '" class="jq-dropdown jq-dropdown-scroll jq-dropdown-anchor-right">' +
                     '    <ul class="jq-dropdown-menu">' +
                     '        loading...' + // todo: add spinner here
@@ -198,12 +210,13 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                     '<div class="dropdown-container bfu-filter-dropdown">' +
                     '    <span><a href="#" data-jq-dropdown="#jq-dropdown-' + args.column.id + '" class="bfu-filter-dropdown" data-horizontal-offset="4" data-vertical-offset="4"></a></span>'
                     '</div>"';
-                $(filterMenu).appendTo(args.node);
+                    $(filterMenu).appendTo(args.node);
+                
             });
-            
-            // todo: rename function
-            $("#test-link").click(
-            function () {
+
+            // handle filter checkbox change
+            $("#filter-dropdown-container").on("change", "input:checkbox", function () {
+                console.log("changed");
                 var filters = {};
 
                 // go over each filter dropdown state
@@ -212,7 +225,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                     var values = [];
 
                     var selector = "#jq-dropdown-" + columns[i].id + " .jq-dropdown-menu input:checkbox";
-                    $(selector).each(function () {
+                    $(selector).not(".checkall").each(function () {
                         if (!$(this).prop("checked"))
                             values.push($(this).val());
                     });
@@ -225,9 +238,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 
                 var vp = grid.getViewport();
                 loader.clearData();
-                loader.updateTotalCount(loader.ensureData(vp.top, vp.bottom));
-
-                return false;
+                loader.updateTotalCount(function () { loader.ensureData(vp.top, vp.bottom) });
             });
 
             $("#run-query").click(function (e) {
@@ -265,7 +276,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
         });
     </script>
-    
+    <div id="jq-dropdown-station1"><ul><li></li></ul></div>
 
 </body>
 </html>
