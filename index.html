@@ -212,7 +212,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 for (var col in columns) {
                     $('<div id="jq-dropdown-' + columns[col].id + '" class="jq-dropdown jq-dropdown-scroll jq-dropdown-anchor-right">' +
                     '    <ul class="jq-dropdown-menu">' +
-                    '        loading...' + // todo: add spinner here
+                    '       <li class="jq-dropdown-loading">loading</li>' +
                     '    </ul>' +
                     '</div>').appendTo(container);
                     
@@ -237,7 +237,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
             grid.onHeaderCellRendered.subscribe(function (e, args) {
                 $(args.headerNode).empty();
-                console.log("onHeaderCellRendered");
                 // todo: a bit much to dynamically append, there is probably a much more elegant solution to this
                 var filterMenu =
                     '<div class="dropdown-container bfu-filter-dropdown">' +
@@ -249,7 +248,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
             // handle filter checkbox change
             $("#filter-dropdown-container").on("change", "input:checkbox", function () {
-                console.log("changed");
                 var filters = {};
 
                 // go over each filter dropdown state
@@ -271,6 +269,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                     filters[columns[i].id] = { selectedLength: selectedCount, values: values};
                 }
                 console.log(filters);
+                
                 loader.setFilters(filters);
 
                 // scroll to top to make sure there's data in our viewport

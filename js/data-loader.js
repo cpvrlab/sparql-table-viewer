@@ -118,9 +118,10 @@
             $.each(filters, function (column, filterValues) {
 
                 // continue if the filter has everything selected
-                console.log("deciding if I should skip: " + filterValues.selectedLength + " " + distinctValues[column].length);
-                if (filterValues.selectedLength == distinctValues[column].length) {
-                    console.log("skipping because all selected " + filterValues.selectedLength + " " + distinctValues[column].length);
+                // or is not loaded at all
+                //console.log("deciding if I should skip: " + filterValues.selectedLength + " " + distinctValues[column].length);
+                if (typeof distinctValues[column] === 'undefined'
+                    || filterValues.selectedLength == distinctValues[column].length) {
                     return true;
                 }
 
