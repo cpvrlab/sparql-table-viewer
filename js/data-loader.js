@@ -119,7 +119,6 @@
 
                 // continue if the filter has everything selected
                 // or is not loaded at all
-                //console.log("deciding if I should skip: " + filterValues.selectedLength + " " + distinctValues[column].length);
                 if (typeof distinctValues[column] === 'undefined'
                     || filterValues.selectedLength == distinctValues[column].length) {
                     return true;
@@ -138,7 +137,6 @@
                     || filterValues.selectedLength == 0) {
                     lessSelectedValues = false;
                 }
-                console.log("less selected: " + lessSelectedValues);
 
                 sparqlQuery.filters += "FILTER(";
 
@@ -183,7 +181,7 @@
                 orderBy: "ORDER BY ASC(?" + columnId + ")"
             };
 
-            var queryString = compileSparqlQuery({ useLimit: false }, queryObject);
+            var queryString = compileSparqlQuery({ useLimit: false, useFilters: false }, queryObject);
             var req = $.ajax({
                 dataType: "json",
                 type: "POST",
