@@ -54,21 +54,23 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
     <div id="myGrid" style="width:90%;height:490px;"></div>
     <br />
-    <label>Download as: </label>
-    <select id="download-format">
-        <option value="text/html" selected="selected">HTML</option>
-        <option value="application/vnd.ms-excel">Spreadsheet</option>
-        <option value="application/sparql-results+xml">XML</option>
-        <option value="application/sparql-results+json">JSON</option>
-        <option value="application/javascript">Javascript</option>
-        <option value="text/turtle">Turtle</option>
-        <option value="application/rdf+xml">RDF/XML</option>
-        <option value="text/plain">N-Triples</option>
-        <option value="text/csv">CSV</option>
-        <option value="text/tab-separated-values">TSV</option>
-    </select>
-    <input id="download-submit" type="button" value="Download" />
-
+    <form id="download-form" method="post" action="http://test.lindas-data.ch/sparql" target="download-window">
+        <label>Download as: </label>
+        <input type="hidden" id="download-query" name="query" value=""/>
+        <select id="download-format" name="format">
+            <option value="text/html" selected="selected">HTML</option>
+            <option value="application/vnd.ms-excel">Spreadsheet</option>
+            <option value="application/sparql-results+xml">XML</option>
+            <option value="application/sparql-results+json">JSON</option>
+            <option value="application/javascript">Javascript</option>
+            <option value="text/turtle">Turtle</option>
+            <option value="application/rdf+xml">RDF/XML</option>
+            <option value="text/plain">N-Triples</option>
+            <option value="text/csv">CSV</option>
+            <option value="text/tab-separated-values">TSV</option>
+        </select>
+        <input id="download-submit" type="button" value="Download" />
+    </form>
     <br />
 
     <script type="text/javascript" src="lib/jQuery/jquery-1.11.3.min.js"></script>
@@ -303,11 +305,10 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 });
             }
 
-            $('#download-submit').click(function (e) {
-                var url = loader.compileQueryURL({ useLimit: false }) + "&format=" + $("#download-format option:selected").val();
-
-                console.log("download: " + url);
-                window.location = downloadURL;
+            $('#download-submit').click(function (e) {                
+                $("#download-query").val(loader.compileSparqlQuery({ useLimit: false }));
+                window.open('', 'download-window');
+                document.getElementById('download-form').submit();
             });
 
             // update the query textbox with the new text
