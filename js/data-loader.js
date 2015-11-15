@@ -242,13 +242,7 @@
                 }
             });
         }
-
-        function defaultValue(variable, defaultVal)
-        {
-            variable = typeof variable !== 'undefined' ? variable : defaultVal;
-            return variable;
-        }
-
+        
         function compileSparqlQuery(options, queryObject)
         {
             // set default values
@@ -256,17 +250,17 @@
                 options = {};
             if (typeof queryObject == 'undefined')
                 queryObject = {};
+            
+            options.useSort = options.useSort !== false;
+            options.useLimit = options.useLimit !== false;
+            options.useFilters = options.useFilters !== false;
 
-            options.useSort = defaultValue(options.useSort, true);
-            options.useLimit = defaultValue(options.useLimit, true);
-            options.useFilters = defaultValue(options.useFilters, true);
-
-            queryObject.prologue = defaultValue(queryObject.prologue, sparqlQuery.prologue);
-            queryObject.outerSelect = defaultValue(queryObject.outerSelect, sparqlQuery.outerSelect);
-            queryObject.query = defaultValue(queryObject.query, sparqlQuery.query);
-            queryObject.orderBy = defaultValue(queryObject.orderBy, sparqlQuery.orderBy);
-            queryObject.filters = defaultValue(queryObject.filters, sparqlQuery.filters);
-            queryObject.limit = defaultValue(queryObject.limit, sparqlQuery.limit);
+            queryObject.prologue = queryObject.prologue || sparqlQuery.prologue;
+            queryObject.outerSelect = queryObject.outerSelect || sparqlQuery.outerSelect;
+            queryObject.query = queryObject.query || sparqlQuery.query;
+            queryObject.orderBy = queryObject.orderBy || sparqlQuery.orderBy;
+            queryObject.filters = queryObject.filters || sparqlQuery.filters;
+            queryObject.limit = queryObject.limit || sparqlQuery.limit;
             
             // check if we need limit, orderby or filters
             if (!options.useLimit)
