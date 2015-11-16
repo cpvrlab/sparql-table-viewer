@@ -122,7 +122,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         var downloadURL;
         var viewportChangedTimer;
 
-        loader = new udb.DataLoader(PAGESIZE);
+        loader = new udb.DataLoader(PAGESIZE, PAGESIZE * 0.3);
         grid = new Slick.Grid("#myGrid", loader.data, [], options);
 
         $(function () {
@@ -149,15 +149,32 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 loadingIndicator.fadeOut();
             });
 
-            var viewportChangedTimer;
+            var lastCallTimer;
+            var continousScrollingTimer = null;
             grid.onViewportChanged.subscribe(function (e, args) {
                 console.log('viewport changed');
-                clearTimeout(viewportChangedTimer);
-                // only fire this every 1/4 sec at most.
-                viewportChangedTimer = setTimeout(function () {
-                    var vp = grid.getViewport();
+                clearTimeout(lastCallTimer);
+
+                var vp = grid.getViewport();
+
+                // ensure data during continous scrolling input
+                if (!continousScrollingTimer) {
                     loader.ensureData(vp.top, vp.bottom);
-                }, 250);
+
+                    // reset the continous scrolling timer after 500ms to
+                    // trigger a new ensureData call
+                    continousScrollingTimer =
+                        setTimeout(function () {
+                            continousScrollingTimer = null;
+                        }, 500);
+                }
+
+                // ensure a call is made 100 ms after last call of onViewportChange
+                // this makes sure that we have data for our current viewport
+                lastCallTimer = setTimeout(function () {
+                    loader.ensureData(vp.top, vp.bottom);
+                    }, 100);               
+
             });
 
 

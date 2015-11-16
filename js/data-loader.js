@@ -1,9 +1,10 @@
 (function ($) {
 
-    function DataLoader(pageSize) {
+    function DataLoader(pageSize, preLoadExtent) {
 
         var self = this;
         var pageSize = pageSize;
+        var preLoadExtent = preLoadExtent;
         var totalCount = 40;
         var data = { length: 0 }; // the data rows, which we'll fill in, plus an extra property for total length
         var pagesToLoad = {};
@@ -12,7 +13,7 @@
         var filters = []; // {column: "pollutant", comperator: "=", literal: "O3"} 
         var filterRequestStatus = {};
         var distinctValues = {}; // distinct column values: { "station" : ["Aarau", "Aargau"], ... }
-        var dataXHR = null;
+        var dataXHR = [];
         var countXHR = null;
 
         // temporary filter test data
@@ -40,6 +41,9 @@
             }
             data.length = totalCount;
             pagesToLoad = {};
+
+            // abort all running xhr requests for data
+            abortAllDataRequests();
         }
 
         function clearColumns() {
@@ -48,18 +52,22 @@
         
         // from and to are 0-based row indices.
         function ensureData(from, to) {
+            if (totalCount <= 0)
+                return;
+
             data.length = totalCount;
 
-            if (from < 0) {
-                from = 0;
-            }
-            if (to > data.length - 1) {
-                to = data.length - 1;
-            }
+            from -= preLoadExtent;
+            to += preLoadExtent;
+
+            // clamp from 0 to data.length - 1
+            from = Math.min(Math.max(from, 0), data.length - 1);
+            to = Math.min(Math.max(to, 0), data.length - 1);
 
             var fromPage = Math.floor(from / pageSize);
             var toPage = Math.floor(to / pageSize);
 
+            console.log("ensure data " + from + " " + to);
 
             for (var page = fromPage; page <= toPage; page++) {
                 if (pagesToLoad[page] == undefined) {
@@ -67,7 +75,13 @@
                 }
             }
 
+            console.log("LOADING: " + fromPage + " " + toPage);
+
             // do a bunch of queries to get the data for the range.
+            // todo: remove this batching code, it doesn't do anything at the moment
+            //       and if it did it wouldn't work properly because
+            //       we added that abort code. It only works because we only load
+            //       one page at a time
             for (var page = fromPage; page <= toPage; page++) {
                 if (pagesToLoad[page] == null) {
                     onDataLoading.notify({ from: from, to: to });
@@ -102,6 +116,18 @@
 
         function setLimit(page, limit) {
             sparqlQuery.limit = "LIMIT " + limit + " OFFSET " + (page * limit);
+        }
+
+        function abortAllDataRequests()
+        {
+            for(var i in dataXHR)
+            {
+                dataXHR[i].abort();
+            }
+
+            dataXHR = [];
+
+            console.log("ABORTED ALL DATA REQUESTS!");
         }
 
         /** Adds a new comparison filter to this loader. 
@@ -299,16 +325,13 @@
         }
         
         function loaderFunction(page) {
-            if (dataXHR && dataXHR.readystate != 4) {
-                dataXHR.abort();
-                console.log("Aborted previous data request.");
-            }
+
             console.log("Sending new data request.");
 
             // our sparql pages are 1-based.
             var queryString = compileSparqlQuery();
             var sparqlPage = page + 1
-            dataXHR = $.ajax({
+            var xhr = $.ajax({
                 dataType: 'json',
                 type: 'POST',
                 data: { query: queryString },
@@ -321,11 +344,20 @@
                     console.log('error loading page ' + page.toString());
                 }
             });
-            dataXHR.page = page;
+            xhr.page = page;
+            dataXHR.push(xhr);
         }
 
         function ajaxSuccess(responseData, textStatus, jqXHR) {
             console.log("recieved data request answer.");
+
+            // remove xhr from the dataXHR array
+            console.log("updating dataXHR:");
+            console.log(dataXHR);
+            dataXHR = dataXHR.filter(function (elem) {
+                return elem != jqXHR;
+            });
+            console.log(dataXHR);
 
             // set the columns if not already set.
             if (columns.length == 0) {
