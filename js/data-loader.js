@@ -12,6 +12,8 @@
         var filters = []; // {column: "pollutant", comperator: "=", literal: "O3"} 
         var filterRequestStatus = {};
         var distinctValues = {}; // distinct column values: { "station" : ["Aarau", "Aargau"], ... }
+        var dataXHR = null;
+        var countXHR = null;
 
         // temporary filter test data
         
@@ -209,6 +211,12 @@
 
         function updateTotalCount(complete)
         {
+            if (countXHR && countXHR.readystate != 4) {
+                countXHR.abort();
+                console.log("Aborted previous count request.");
+            }
+            console.log("Sending new count request.");
+
             // todo: our event firing and exposing is a bit messy at the moment
             //       for example we expose this function 'updateTotalCount' to the user
             //       which is bad... mhhh k?
@@ -217,7 +225,7 @@
             //       again in a sec when the actual data is being loaded... good or bad?
             onDataLoading.notify();
             var queryString = compileSparqlQuery({ useLimit: false }, { outerSelect: "SELECT COUNT(*) as ?count WHERE" });
-            var req = $.ajax({
+            countXHR = $.ajax({
                 dataType: "json",
                 type: "POST",
                 data: { query: queryString },
@@ -230,7 +238,7 @@
                     // so our count result should be at 0 0
                     totalCount = parseInt(resp.results.bindings[0]["count"]["value"]);
                     data.length = totalCount;
-                    console.log("counted " + totalCount + " rows");
+                    console.log("recieved count request answer: " + totalCount + " rows");
 
                     onRowCountChanged.notify({ count: totalCount });
 
@@ -291,10 +299,16 @@
         }
         
         function loaderFunction(page) {
+            if (dataXHR && dataXHR.readystate != 4) {
+                dataXHR.abort();
+                console.log("Aborted previous data request.");
+            }
+            console.log("Sending new data request.");
+
             // our sparql pages are 1-based.
             var queryString = compileSparqlQuery();
             var sparqlPage = page + 1
-            var req = $.ajax({
+            dataXHR = $.ajax({
                 dataType: 'json',
                 type: 'POST',
                 data: { query: queryString },
@@ -307,10 +321,12 @@
                     console.log('error loading page ' + page.toString());
                 }
             });
-            req.page = page;
+            dataXHR.page = page;
         }
 
         function ajaxSuccess(responseData, textStatus, jqXHR) {
+            console.log("recieved data request answer.");
+
             // set the columns if not already set.
             if (columns.length == 0) {
                 var vars = responseData["head"]["vars"];
