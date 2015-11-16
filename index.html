@@ -172,6 +172,10 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             loader.onRowCountChanged.subscribe(function (e, args) {
                 grid.updateRowCount();
                 grid.render();
+
+                // hide loading indicator in case there are no results
+                if(args.count == 0)
+                    loadingIndicator.fadeOut();
             });
 
             loader.onFilterValuesRetrieved.subscribe(function (e, args) {
