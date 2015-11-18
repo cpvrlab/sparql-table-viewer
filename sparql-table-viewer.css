@@ -147,6 +147,11 @@ div.loading-indicator label {
     width: 100%;
 }
 
+.dropdown-container a.active {    
+    /* color: white; */
+    background: url('images/filter_active_icon.png') no-repeat center center;
+}
+
 /* jq-dropdown */
 .jq-dropdown .jq-dropdown-menu, .jq-dropdown .jq-dropdown-panel {
     min-width: 160px;

@@ -279,7 +279,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 // todo: a bit much to dynamically append, there is probably a much more elegant solution to this
                 var filterMenu =
                     '<div class="dropdown-container bfu-filter-dropdown">' +
-                    '    <span><a href="#" data-jq-dropdown="#jq-dropdown-' + args.column.id + '" class="bfu-filter-dropdown" data-horizontal-offset="4" data-vertical-offset="4"></a></span>'
+                    '    <span><a href="#" id="filter-dropdown-' + args.column.id + '" data-jq-dropdown="#jq-dropdown-' + args.column.id + '" class="bfu-filter-dropdown" data-horizontal-offset="4" data-vertical-offset="4"></a></span>'
                 '</div>"';
                 $(filterMenu).appendTo(args.node);
 
@@ -304,6 +304,19 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                         
                         values.push({ value: $(this).val(), isSelected: selected });
                     });
+
+                    // deselect the 'selectall' checkbox if not all filters are checked
+                    if (selectedCount != values.length) {
+                        $("#jq-dropdown-" + columns[i].id).find(".checkall").prop("checked", false);
+
+                        // set the icon
+                        $("#filter-dropdown-" + columns[i].id).addClass("active");
+                    }
+                    else {
+                        $("#jq-dropdown-" + columns[i].id).find(".checkall").prop("checked", true);
+                        $("#filter-dropdown-" + columns[i].id).removeClass("active");
+                    }
+
 
                     filters[columns[i].id] = { selectedLength: selectedCount, values: values};
                 }
