@@ -143,7 +143,7 @@
 
             
 
-            sparqlQuery.filters = "";
+            sparqlQuery.filters = {};
             $.each(filters, function (column, filterValues) {
 
                 // continue if the filter has everything selected
@@ -166,8 +166,8 @@
                     || filterValues.selectedLength == 0) {
                     lessSelectedValues = false;
                 }
-
-                sparqlQuery.filters += "FILTER(";
+                sparqlQuery.filters[column] = sparqlQuery.filters[column] || "";
+                sparqlQuery.filters[column] += "FILTER(";
 
                 var filterCounter = 0;
                 $.each(filterValues.values, function (i, val) {
@@ -189,16 +189,16 @@
                         isLastElement = filterCounter == (filterValues.selectedLength - 1);
                     }
                     
-                    sparqlQuery.filters +=
+                    sparqlQuery.filters[column] +=
                         "STR(?" + column + ")" + comperator + "\"" + val.value + "\"";
 
                     if (!isLastElement)
-                        sparqlQuery.filters += connector;
+                        sparqlQuery.filters[column] += connector;
 
                     filterCounter++;
                 });
 
-                sparqlQuery.filters += ")\n";
+                sparqlQuery.filters[column] += ")\n";
             });                      
         }
 
@@ -210,7 +210,7 @@
                 orderBy: "ORDER BY ASC(?" + columnId + ")"
             };
 
-            var queryString = compileSparqlQuery({ useLimit: false, useFilters: false }, queryObject);
+            var queryString = compileSparqlQuery({ useLimit: false, useFilters: true, excludeFilterColumns: [columnId] }, queryObject);
             var req = $.ajax({
                 dataType: "json",
                 type: "POST",
@@ -291,6 +291,7 @@
             options.useSort = options.useSort !== false;
             options.useLimit = options.useLimit !== false;
             options.useFilters = options.useFilters !== false;
+            options.excludeFilterColumns = options.excludeFilterColumns || [];
 
             queryObject.prologue = queryObject.prologue || sparqlQuery.prologue;
             queryObject.outerSelect = queryObject.outerSelect || sparqlQuery.outerSelect;
@@ -304,8 +305,25 @@
                 queryObject.limit = "";
             if (!options.useSort)
                 queryObject.orderBy = "";
-            if (!options.useFilters)
-                queryObject.filters = "";
+
+            var finalFilterString = "";
+            if(options.useFilters) {
+                // build final filter query
+                for(var column in queryObject.filters)
+                {
+                    console.log("options.excludeFilterColumns");
+                    console.log(options.excludeFilterColumns);
+                    // if the exclude doesn't exists for the current column, add it
+                    // to the final filter string
+                    if (options.excludeFilterColumns.indexOf(column) == -1) {
+                        finalFilterString += "#filters for " + column + "\n"
+                            + queryObject.filters[column] + "\n";
+                    }
+                    else {
+                        console.log("EXCLUDING A COLUMN");
+                    }
+                }
+            }
 
             // build final query
             var queryString =
@@ -315,7 +333,7 @@
                 queryObject.query +
                 queryObject.orderBy +
                 "\n}\n" + // inner filter block END
-                queryObject.filters +
+                finalFilterString +
                 "}\n" + // outer select block END
                 queryObject.limit;
 

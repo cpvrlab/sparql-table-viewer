@@ -132,6 +132,8 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         var loadingIndicator;
         var downloadURL;
         var viewportChangedTimer;
+        var prevFilterState;
+        var reloadFilters;
 
         loader = new udb.DataLoader(PAGESIZE, PAGESIZE * 0.3);
         grid = new Slick.Grid("#myGrid", loader.data, [], options);
@@ -228,17 +230,34 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 $(selector).html("");
 
                 var html = "";
-
-                // add check all checkbox
-                html += '<li><label><input type="checkbox" class="checkall" checked />Check all</label></li>';
-                html += '<li class="jq-dropdown-divider"></li>';
-
+                
                 // fill it with new list of filters
+                var setCheckAllChecked = true; // so sorry for this var name...
                 for (var i in args.values) {
-                    html += '<li><label><input type="checkbox" value="' + args.values[i] + '" checked/>' + args.values[i] + '</label></li>';
+                    var setChecked = true;
+                    // restore previous state of this filter
+                    if (typeof prevFilterState !== "undefined") {
+                        if (typeof prevFilterState[args.column].values !== "undefined" &&
+                            prevFilterState[args.column].values.length > 0) {
+                            // using jquery grep to search for a specific property in the values array
+                            var element = $.grep(prevFilterState[args.column].values, function (e) {
+                                return e.value == args.values[i];
+                            });
+                            if (typeof element[0] !== "undefined")
+                                setChecked = element[0].isSelected;
+                            if (setChecked == false)
+                                setCheckAllChecked = false;
+                        }
+                    }
+                    html += '<li><label><input type="checkbox" value="' + args.values[i] + '" ' + ((setChecked) ? 'checked' : '') + '/>' + args.values[i] + '</label></li>';
                 }
+                
+                // add check all checkbox
+                var htmlCheckall = '<li><label><input type="checkbox" class="checkall"' + ((setCheckAllChecked) ? 'checked' : '') + ' />Check all</label></li>';
+                htmlCheckall += '<li class="jq-dropdown-divider"></li>';
 
-                $(selector).append(html);
+
+                $(selector).append(htmlCheckall + html);
 
                 // add check all functionality
                 $(selector).on("change", ".checkall", function () {
@@ -256,6 +275,8 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 // clear all the current dropdowns
                 $(container).html("");
 
+                reloadFilters = {};
+                prevFilterState = {};
                 // add a dropdown for each column and initialize its content with a spinner
                 for (var col in columns) {
                     $('<div id="jq-dropdown-' + columns[col].id + '" class="jq-dropdown jq-dropdown-scroll jq-dropdown-anchor-right">' +
@@ -270,15 +291,24 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
                             // attach a callback to the just created dropdown to receive list data
                             // only after it's been opened for the first time
-                            // note: we use .one here, this is a callback that runs once and then detaches
-                            // itself. jQuery, yey.
-                            $("#jq-dropdown-" + columns[col].id).one("show", function () {
-                                loader.requestFilterData(columnId);
+                            $("#jq-dropdown-" + columns[col].id).on("show", function () {
+                                console.log("do i need to reload filters for " + columns[col].id);
+                                if (reloadFilters[columnId]) {
+                                    // todo show the loading bar and delete old content here
+                                    loader.requestFilterData(columnId);
+                                    reloadFilters[columnId] = false;
+                                }
                             });
 
                         }
                     })(columns[col].id);
                     testFunc();
+
+                    // mark filters for this column for reloading
+                    reloadFilters[columns[col].id] = true;
+
+                    // initialize the prevFilterState with zero lengths
+                    prevFilterState[columns[col].id] = { selectedLength: 0 }
                 }
 
             });
@@ -297,6 +327,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             // handle filter checkbox change
             $("#filter-dropdown-container").on("change", "input:checkbox", function () {
                 var filters = {};
+                var changedColumn;
 
                 // go over each filter dropdown state
                 var columns = grid.getColumns();
@@ -328,10 +359,25 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
 
                     filters[columns[i].id] = { selectedLength: selectedCount, values: values};
+
+                    // keep track on what column changed
+                    if(prevFilterState[columns[i].id].selectedLength != selectedCount)
+                        changedColumn = columns[i].id;
                 }
                 console.log(filters);
                 
                 loader.setFilters(filters);
+
+                // keep a copy of the filter object
+                prevFilterState = filters;
+
+                // mark other filters for reload
+                // todo: this current method will cause tons of events to accumulate, this has to be changed soon
+                for (var i in columns) {
+                    if (columns[i].id != changedColumn) {
+                        reloadFilters[columns[i].id] = true;
+                    }
+                }
 
                 // scroll to top to make sure there's data in our viewport
                 grid.scrollRowToTop(0);
