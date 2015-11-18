@@ -8,7 +8,6 @@
 </head>
 <body>
     <form>
-        <a id="toggle-query-edit" href="#">toggle editor</a>
         <br />                
         <div id="query-edit-container" style="display:none">
             <div style="float:left; width:45%">
@@ -51,11 +50,20 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
         </div>
 
     </form>
-
-    <span><span id="row-count">0</span> rows</span> <span id="error-message"></span>
-
-    <div id="myGrid" style="width:90%;height:490px;"></div>
-    <br />
+    <div>
+        <h1>Raum, Umwelt</h1>
+        <h2>Luftqualität Schweiz (Jahreswerte)</h2>
+        <p>Messdaten (Jahreswerte) von nationalen, kantonalen und kommunalen Messstationen für Luftschadstoffe, zusammengestellt durch die Schweizerische Gesellschaft der Lufthygiene-Fachleute (Cercl'Air) und das BAFU</p>
+        <p>1.1.1984 - 31.12.2014</p>
+    </div>
+    <div style="float: right">
+        <span id="row-count">0</span> rows</span> <span id="error-message"></span>
+        <a id="toggle-query-edit" href="#">Query Editor</a>
+    </div>
+    <br>
+    <br>
+    <div id="myGrid" style="width:100%;height: 490px;"></div>
+    <br>
     <form id="download-form" method="post" action="http://test.lindas-data.ch/sparql" target="download-window">
         <label>Download as: </label>
         <input type="hidden" id="download-query" name="query" value=""/>
