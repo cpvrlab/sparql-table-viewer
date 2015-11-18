@@ -66,12 +66,13 @@ li {
 }
 
 .slick-sort-indicator {
-    display: inline-block;
     width: 9px;
     height: 5px;
     margin-left: 4px;
     margin-top: 8px;
-    float: left;
+    position: absolute;
+    left: 9px;
+    display: inline-block;
 }
 .slick-sort-indicator-asc {
     background: url(images/sort-asc.gif);
@@ -79,6 +80,10 @@ li {
 
 .slick-sort-indicator-desc {
     background: url(images/sort-desc.gif);
+}
+
+.slick-header-column-sorted .slick-column-name {
+    margin-left: 16px;
 }
 
 div.loading-indicator {
@@ -126,10 +131,12 @@ div.loading-indicator label {
 }
 
 .dropdown-container {
-    display: block;
-    float: right;
-    height: 100%;
     width: 30px;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    height: 100%;
+    display: block;
 }
 
 .dropdown-container a {    
