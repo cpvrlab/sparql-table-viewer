@@ -34,6 +34,7 @@
         var onColumnsChanged = new Slick.Event();
         var onRowCountChanged = new Slick.Event();
         var onFilterValuesRetrieved = new Slick.Event();
+        var onErrorOccurred = new Slick.Event();
 
         function clearData() {
             for (var key in data) {
@@ -230,6 +231,7 @@
                     onFilterValuesRetrieved.notify({ column: columnId, values: vals });
                 },
                 error: function () {
+                    onErrorOccurred.notify({ msg: "Can't reach the server." });
                     console.log("error retrieving filter values");
                 }
             });
@@ -272,6 +274,7 @@
                         complete();
                 },
                 error: function () {
+                    onErrorOccurred.notify({ msg: "Can't reach the server." });
                     console.log("error retrieving count query results");
                 }
             });
@@ -341,6 +344,7 @@
                 cache: true,
                 success: ajaxSuccess,
                 error: function () {
+                    onErrorOccurred.notify({ msg: "Can't reach the server." });
                     console.log('error loading page ' + page.toString());
                 }
             });
@@ -426,7 +430,8 @@
             "onDataLoaded": onDataLoaded,
             "onColumnsChanged": onColumnsChanged,
             "onRowCountChanged": onRowCountChanged,
-            "onFilterValuesRetrieved": onFilterValuesRetrieved
+            "onFilterValuesRetrieved": onFilterValuesRetrieved,
+            "onErrorOccurred": onErrorOccurred
         };
     }
 

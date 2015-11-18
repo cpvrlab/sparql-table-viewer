@@ -52,6 +52,8 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
 
     </form>
 
+    <span><span id="row-count">0</span> rows</span> <span id="error-message"></span>
+
     <div id="myGrid" style="width:90%;height:490px;"></div>
     <br />
     <form id="download-form" method="post" action="http://test.lindas-data.ch/sparql" target="download-window">
@@ -112,7 +114,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             enableCellNavigation: true,
             enableColumnReorder: false,
             syncColumnCellResize: true,
-            enableAddRow: true,
+            //enableAddRow: true,
             asyncEditorLoading: true,
             forceFitColumns: true,
             topPanelHeight: 20,
@@ -190,9 +192,23 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 grid.updateRowCount();
                 grid.render();
 
+                $("#row-count").html(args.count);
+
                 // hide loading indicator in case there are no results
                 if(args.count == 0)
                     loadingIndicator.fadeOut();
+            });
+
+            // probably not the best solution to displaying errors but...
+            loader.onErrorOccurred.subscribe(function (e, args) {
+                $("#error-message").html(args.msg);
+
+                var hideMsgTimer;
+                clearTimeout(hideMsgTimer);
+
+                hideMsgTimer = setTimeout(function () {
+                    $("#error-message").html("");
+                }, 8000);
             });
 
             loader.onFilterValuesRetrieved.subscribe(function (e, args) {
