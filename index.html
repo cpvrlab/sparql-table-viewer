@@ -294,8 +294,13 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                             $("#jq-dropdown-" + columns[col].id).on("show", function () {
                                 console.log("do i need to reload filters for " + columns[col].id);
                                 if (reloadFilters[columnId]) {
-                                    // todo show the loading bar and delete old content here
+                                    // show loading bar again 
+                                    $(this).find(".jq-dropdown-menu").html('<li class="jq-dropdown-loading">loading</li>');
+
+                                    // request data
                                     loader.requestFilterData(columnId);
+
+                                    // mark this filter as reloaded
                                     reloadFilters[columnId] = false;
                                 }
                             });
