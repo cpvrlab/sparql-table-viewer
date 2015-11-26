@@ -68,15 +68,13 @@
             var fromPage = Math.floor(from / pageSize);
             var toPage = Math.floor(to / pageSize);
 
-            console.log("ensure data " + from + " " + to);
+            //console.log("ensure data " + from + " " + to);
 
             for (var page = fromPage; page <= toPage; page++) {
                 if (pagesToLoad[page] == undefined) {
                     pagesToLoad[page] = null;
                 }
             }
-
-            console.log("LOADING: " + fromPage + " " + toPage);
 
             // do a bunch of queries to get the data for the range.
             // todo: remove this batching code, it doesn't do anything at the moment
@@ -128,7 +126,7 @@
 
             dataXHR = [];
 
-            console.log("ABORTED ALL DATA REQUESTS!");
+            // console.log("ABORTED ALL DATA REQUESTS!");
         }
 
         /** Adds a new comparison filter to this loader. 
@@ -204,7 +202,7 @@
 
         function requestFilterData(columnId)
         {
-            console.log("requested filters for " + columnId);
+            //console.log("requested filters for " + columnId);
             var queryObject = {
                 outerSelect: "SELECT DISTINCT(?" + columnId + ") WHERE",
                 orderBy: "ORDER BY ASC(?" + columnId + ")"
@@ -241,9 +239,9 @@
         {
             if (countXHR && countXHR.readystate != 4) {
                 countXHR.abort();
-                console.log("Aborted previous count request.");
+                //console.log("Aborted previous count request.");
             }
-            console.log("Sending new count request.");
+            //console.log("Sending new count request.");
 
             // todo: our event firing and exposing is a bit messy at the moment
             //       for example we expose this function 'updateTotalCount' to the user
@@ -266,7 +264,7 @@
                     // so our count result should be at 0 0
                     totalCount = parseInt(resp.results.bindings[0]["count"]["value"]);
                     data.length = totalCount;
-                    console.log("recieved count request answer: " + totalCount + " rows");
+                    //console.log("recieved count request answer: " + totalCount + " rows");
 
                     onRowCountChanged.notify({ count: totalCount });
 
@@ -311,8 +309,8 @@
                 // build final filter query
                 for(var column in queryObject.filters)
                 {
-                    console.log("options.excludeFilterColumns");
-                    console.log(options.excludeFilterColumns);
+                    //console.log("options.excludeFilterColumns");
+                    //console.log(options.excludeFilterColumns);
                     // if the exclude doesn't exists for the current column, add it
                     // to the final filter string
                     if (options.excludeFilterColumns.indexOf(column) == -1) {
@@ -320,7 +318,7 @@
                             + queryObject.filters[column] + "\n";
                     }
                     else {
-                        console.log("EXCLUDING A COLUMN");
+                        //console.log("EXCLUDING A COLUMN");
                     }
                 }
             }
@@ -347,7 +345,7 @@
         
         function loaderFunction(page) {
 
-            console.log("Sending new data request.");
+            //console.log("Sending new data request.");
 
             // our sparql pages are 1-based.
             var queryString = compileSparqlQuery();
@@ -371,15 +369,12 @@
         }
 
         function ajaxSuccess(responseData, textStatus, jqXHR) {
-            console.log("recieved data request answer.");
+            //console.log("recieved data request answer.");
 
             // remove xhr from the dataXHR array
-            console.log("updating dataXHR:");
-            console.log(dataXHR);
             dataXHR = dataXHR.filter(function (elem) {
                 return elem != jqXHR;
             });
-            console.log(dataXHR);
 
             // set the columns if not already set.
             if (columns.length == 0) {

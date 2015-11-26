@@ -149,7 +149,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             });
 
             loader.onDataLoaded.subscribe(function (e, args) {
-                console.log("data loaded from " + args.from + " to " + args.to);
+                //console.log("data loaded from " + args.from + " to " + args.to);
                 for (var i = args.from; i <= args.to; i++) {
                     grid.invalidateRow(i); // causes the appropriate rows to redraw.
                 }
@@ -165,7 +165,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             var lastCallTimer;
             var continousScrollingTimer = null;
             grid.onViewportChanged.subscribe(function (e, args) {
-                console.log('viewport changed');
+                //console.log('viewport changed');
                 clearTimeout(lastCallTimer);
 
                 var vp = grid.getViewport();
@@ -196,7 +196,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 var vp = grid.getViewport();
                 loader.clearData();
                 loader.ensureData(vp.top, vp.bottom);
-                console.log("sort called");
+                //console.log("sort called");
             });
 
             loader.onRowCountChanged.subscribe(function (e, args) {
@@ -223,7 +223,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             });
 
             loader.onFilterValuesRetrieved.subscribe(function (e, args) {
-                console.log("Loaded filter values for " + args.column);
+                //console.log("Loaded filter values for " + args.column);
                 var selector = "#jq-dropdown-" + args.column + " .jq-dropdown-menu";
 
                 // clear the current filter content
@@ -266,8 +266,8 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
             });
 
             loader.onColumnsChanged.subscribe(function (e, columns) {
-                console.log("COLUMNS CHANGED!");
-                console.log(columns);
+                //console.log("COLUMNS CHANGED!");
+                //console.log(columns);
                 grid.setColumns(columns);
 
                 var container = "#filter-dropdown-container";
@@ -292,7 +292,6 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                             // attach a callback to the just created dropdown to receive list data
                             // only after it's been opened for the first time
                             $("#jq-dropdown-" + columns[col].id).on("show", function () {
-                                console.log("do i need to reload filters for " + columns[col].id);
                                 if (reloadFilters[columnId]) {
                                     // show loading bar again 
                                     $(this).find(".jq-dropdown-menu").html('<li class="jq-dropdown-loading">loading</li>');
@@ -369,7 +368,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                     if(prevFilterState[columns[i].id].selectedLength != selectedCount)
                         changedColumn = columns[i].id;
                 }
-                console.log(filters);
+                //console.log(filters);
                 
                 loader.setFilters(filters);
 
@@ -410,7 +409,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
                 // set a new query (this creates an actual count query request for row count)
                 loader.setQuery(myCodeMirror.getValue(), function () {
                     // ensure data after we have the correct row count
-                    console.log("data.length: " + loader.data.length);
+                    //console.log("data.length: " + loader.data.length);
                     loader.ensureData(vp.top, vp.bottom);
                 });
             }
