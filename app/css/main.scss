@@ -1,6 +1,6 @@
 
 @import url(https://fonts.googleapis.com/css?family=Roboto);
-@import url(lib/jquery-dropdown/jquery.dropdown.min.css);
+@import url(../lib/jquery-dropdown/jquery.dropdown.min.css);
 
 * {
     font-family: arial;
@@ -24,7 +24,7 @@ ul {
 }
 
 li {
-    background: url("lib/SlickGrid/images/arrow_right_spearmint.png") no-repeat center left;
+    background: url("../lib/SlickGrid/images/arrow_right_spearmint.png") no-repeat center left;
     padding: 0 0 0 14px;
     list-style: none;
     margin: 0;
@@ -108,7 +108,7 @@ div.loading-indicator label {
     display: inline-block;
     width: 100%;
     height: 100%;
-    background: url('images/loading.gif') no-repeat center bottom;
+    background: url('../images/loading.gif') no-repeat center bottom;
 }
 
 /* dropdown */
@@ -141,7 +141,7 @@ div.loading-indicator label {
 
 .dropdown-container a {    
     /* color: white; */
-    background: url('images/filter_icon.png') no-repeat center center;
+    background: url('../images/filter_icon.png') no-repeat center center;
     display:block;
     height: 100%;
     width: 100%;
@@ -149,7 +149,7 @@ div.loading-indicator label {
 
 .dropdown-container a.active {    
     /* color: white; */
-    background: url('images/filter_active_icon.png') no-repeat center center;
+    background: url('../images/filter_active_icon.png') no-repeat center center;
 }
 
 /* jq-dropdown */
@@ -170,7 +170,7 @@ div.loading-indicator label {
 .jq-dropdown-menu li {
     background: none;
 }
-
+ 
 .jq-dropdown .jq-dropdown-menu label, .jq-dropdown .jq-dropdown-menu li>a {
     display: block;
     color: inherit;

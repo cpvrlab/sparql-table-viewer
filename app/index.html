@@ -3,11 +3,11 @@
 <head>
     <link rel="stylesheet" href="lib/SlickGrid/slick.grid.css" type="text/css" />
     <link rel="stylesheet" href="lib/SlickGrid/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css" />
-    <link rel="stylesheet" href="sparql-table-viewer.css" type="text/css" />
     <link rel="stylesheet" href="lib/CodeMirror/codemirror.css">
+    <link rel="stylesheet" href="css/main.css" type="text/css" />
 </head>
 <body>
-    <form>
+    <form> 
         <br />                
         <div id="query-edit-container" style="display:none">
             <div style="float:left; width:45%">
@@ -83,6 +83,7 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     </form>
     <br />
 
+
     <script type="text/javascript" src="lib/jQuery/jquery-1.11.3.min.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery.event.drag-2.2.js"></script>
     <script type="text/javascript" src="lib/SlickGrid/lib/jquery-ui-1.8.16.custom.min.js"></script>
@@ -91,13 +92,13 @@ SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
     <script type="text/javascript" src="lib/CodeMirror/codemirror.js"></script>
     <script type="text/javascript" src="lib/CodeMirror/mode/sparql/sparql.js"></script>
     <script type="text/javascript" src="lib/jquery-dropdown/jquery.dropdown.js"></script>
-    <script type="text/javascript" src="js/data-loader.js"></script>
+    <script type="text/javascript" src="js/app.min.js"></script>
 
     <div id="filter-dropdown-container">
     </div>
 
     <p>Berner Fachhochschule 2015, Marc Wacker, Michael Luggen<br>Uses <a href="https://github.com/mleibman/SlickGrid">SlickGrid</a> and <a href="https://codemirror.net/">CodeMirror</a></p>
-
+ 
     <script type="text/javascript">
         // code mirror
         var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("query"), {
