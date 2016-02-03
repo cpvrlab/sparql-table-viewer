@@ -3,8 +3,6 @@
     function DataLoader(pageSize, preLoadExtent) {
 
         var self = this;
-        var pageSize = pageSize;
-        var preLoadExtent = preLoadExtent;
         var totalCount = 40;
         var data = { length: 0 }; // the data rows, which we'll fill in, plus an extra property for total length
         var pagesToLoad = {};
@@ -71,7 +69,7 @@
             //console.log("ensure data " + from + " " + to);
 
             for (var page = fromPage; page <= toPage; page++) {
-                if (pagesToLoad[page] == undefined) {
+                if (pagesToLoad[page] === undefined) {
                     pagesToLoad[page] = null;
                 }
             }
@@ -81,8 +79,8 @@
             //       and if it did it wouldn't work properly because
             //       we added that abort code. It only works because we only load
             //       one page at a time
-            for (var page = fromPage; page <= toPage; page++) {
-                if (pagesToLoad[page] == null) {
+            for (page = fromPage; page <= toPage; page++) {
+                if (pagesToLoad[page] === null) {
                     onDataLoading.notify({ from: from, to: to });
                     setLimit(page, pageSize);
                     loaderFunction.call(self, page);
@@ -102,7 +100,7 @@
             var re = /.*(PREFIX|BASE).*\n/g; 
             var prologue;
             sparqlQuery.prologue = "";
-            sparqlQuery.query = query
+            sparqlQuery.query = query;
                 
             while ((prologue = re.exec(query)) !== null) {
                 sparqlQuery.prologue += prologue[0] ;
@@ -146,8 +144,8 @@
 
                 // continue if the filter has everything selected
                 // or is not loaded at all
-                if (typeof distinctValues[column] === 'undefined'
-                    || filterValues.selectedLength == distinctValues[column].length) {
+                if (typeof distinctValues[column] === 'undefined' || 
+                    filterValues.selectedLength == distinctValues[column].length) {
                     return true;
                 }
 
@@ -160,8 +158,8 @@
                 //          display. I'll leave it in for now.
                 //          The other option would be to ignore the filter but that would
                 //          be strange behaviour..., so we'll leave it here I guess.
-                if (0.5 * distinctValues[column].length < filterValues.selectedLength
-                    || filterValues.selectedLength == 0) {
+                if (0.5 * distinctValues[column].length < filterValues.selectedLength || 
+                    filterValues.selectedLength === 0) {
                     lessSelectedValues = false;
                 }
                 sparqlQuery.filters[column] = sparqlQuery.filters[column] || "";
@@ -177,7 +175,7 @@
                     // default connector and comperator if we're using unchecked values
                     // then we want to filter with these two
                     var connector = " && ";
-                    var comperator = " != "
+                    var comperator = " != ";
                     var isLastElement = filterCounter == (filterValues.values.length - filterValues.selectedLength - 1);
                     if (lessSelectedValues) {
                         // if however there are less selected values than unchecked ones
@@ -262,7 +260,7 @@
                 success: function (resp, textStatus, jqXHR) {
                     // the count query should always return with just one row and one column
                     // so our count result should be at 0 0
-                    totalCount = parseInt(resp.results.bindings[0]["count"]["value"]);
+                    totalCount = parseInt(resp.results.bindings[0].count.value);
                     data.length = totalCount;
                     //console.log("recieved count request answer: " + totalCount + " rows");
 
@@ -314,8 +312,8 @@
                     // if the exclude doesn't exists for the current column, add it
                     // to the final filter string
                     if (options.excludeFilterColumns.indexOf(column) == -1) {
-                        finalFilterString += "#filters for " + column + "\n"
-                            + queryObject.filters[column] + "\n";
+                        finalFilterString += "#filters for " + 
+                        column + "\n" + queryObject.filters[column] + "\n";
                     }
                     else {
                         //console.log("EXCLUDING A COLUMN");
@@ -349,7 +347,7 @@
 
             // our sparql pages are 1-based.
             var queryString = compileSparqlQuery();
-            var sparqlPage = page + 1
+            var sparqlPage = page + 1;
             var xhr = $.ajax({
                 dataType: 'json',
                 type: 'POST',
@@ -377,8 +375,8 @@
             });
 
             // set the columns if not already set.
-            if (columns.length == 0) {
-                var vars = responseData["head"]["vars"];
+            if (columns.length === 0) {
+                var vars = responseData.head.vars;
                 $.each(vars, function (i, col) {
                     columns.push({ id: col, name: col, field: col, sortable: true });
                     
@@ -387,13 +385,13 @@
             }
             var page = jqXHR.page;
             var rowsData = [];
-            var results = responseData["results"]["bindings"];
+            var results = responseData.results.bindings;
             // go through the results, and make rows data.
             for (var i = 0; i < results.length; i++) {
                 var resultsRow = null;
                 resultsRow = {};
                 for (var col in results[i]) {
-                    resultsRow[col] = results[i][col]["value"];
+                    resultsRow[col] = results[i][col].value;
                 }
                 rowsData.push(resultsRow);
             }

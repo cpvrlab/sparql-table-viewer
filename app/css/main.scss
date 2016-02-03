@@ -29,7 +29,7 @@ li {
     list-style: none;
     margin: 0;
 }
-
+    
 .text-right {
   text-align: right;
 }
@@ -75,11 +75,11 @@ li {
     display: inline-block;
 }
 .slick-sort-indicator-asc {
-    background: url(images/sort-asc.gif);
+    background: url(../images/sort-asc.gif);
 }
 
 .slick-sort-indicator-desc {
-    background: url(images/sort-desc.gif);
+    background: url(../images/sort-desc.gif);
 }
 
 .slick-header-column-sorted .slick-column-name {
@@ -188,10 +188,10 @@ div.loading-indicator label {
 
 #run-query {
     margin: 5px;
-}
+} 
 
 .jq-dropdown-menu li.jq-dropdown-loading {
-    background: url('images/loading-small.gif') no-repeat center bottom;
+    background: url('../images/loading-small.gif') no-repeat center bottom;
     margin: 0px 0px 4px;
     height: 25px;
     text-align: center;
