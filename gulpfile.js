@@ -19,7 +19,7 @@ var paths = {
     scripts: ['js/**/*.js', '!scripts/libs/**/*.js'],
     libs: ['lib/**'],
     css: ['css/**/*.scss'],
-    html: ['index.html'],
+    html: ['index.html', '*.html'],
     images: ['images/**/*.png', 'images/**/*.gif'],
 };
 
