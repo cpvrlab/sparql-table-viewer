@@ -3,7 +3,7 @@ var gulp = require('gulp');
 
 var ghPages = require('gulp-gh-pages');
 var sass = require('gulp-sass');
-var clean = require('gulp-clean');
+var del = require('del');
 var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
@@ -26,8 +26,7 @@ var paths = {
 
 // Delete the dist directory
 gulp.task('clean', function() {
-    return gulp.src(bases.dist)
-    .pipe(clean());
+    return del(bases.dist);
 });
 
 // Process scripts and concatenate them into one output file
