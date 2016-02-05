@@ -1,13 +1,10 @@
 (function ($) {
 
-    function DataLoader(pageSize, preLoadExtent) {
-
-        var self = this;
+    function DataLoader(endPoint, pageSize, preLoadExtent) {
         var totalCount = 40;
         var data = { length: 0 }; // the data rows, which we'll fill in, plus an extra property for total length
         var pagesToLoad = {};
         var columns = [];
-        var endPoint = "http://test.lindas-data.ch/sparql";
         var filters = []; // {column: "pollutant", comperator: "=", literal: "O3"} 
         var filterRequestStatus = {};
         var distinctValues = {}; // distinct column values: { "station" : ["Aarau", "Aargau"], ... }
@@ -83,7 +80,7 @@
                 if (pagesToLoad[page] === null) {
                     onDataLoading.notify({ from: from, to: to });
                     setLimit(page, pageSize);
-                    loaderFunction.call(self, page);
+                    loaderFunction.call(this, page);
                 }
             }
         }
@@ -396,7 +393,7 @@
                 rowsData.push(resultsRow);
             }
             // set the page of data against the loader.
-            loader.setPageOfData(jqXHR.page, rowsData);
+            setPageOfData(jqXHR.page, rowsData);
         }
 
         // given a page index, and an array of row data, set the data for the page
