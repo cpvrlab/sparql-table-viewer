@@ -1950,6 +1950,7 @@ if (typeof Slick === "undefined") {
       var visible = getVisibleRange();
       var rendered = getRenderedRange();
 
+
       // remove rows no longer in the viewport
       cleanupRows(rendered);
 
@@ -1957,6 +1958,8 @@ if (typeof Slick === "undefined") {
       if (lastRenderedScrollLeft != scrollLeft) {
         cleanUpAndRenderCells(rendered);
       }
+      // hack: recalculate padding with, polymer messes this shit up all the time
+      measureCellPaddingAndBorder();
 
       // render missing rows
       renderRows(rendered);

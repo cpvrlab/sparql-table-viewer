@@ -134,6 +134,7 @@
                 grid.updateRowCount(); // uses data.length
                 grid.render();
 
+                grid.resizeCanvas();
                 // update query textbox
                 updateEditTextbox();
 
@@ -271,6 +272,7 @@
                             // only after it's been opened for the first time
                             $("#jq-dropdown-" + columns[col].id).on("show", function () {
                                 if (reloadFilters[columnId]) {
+                                    console.log("hi");
                                     // show loading bar again 
                                     $(this).find(".jq-dropdown-menu").html('<li class="jq-dropdown-loading">loading</li>');
 
@@ -351,13 +353,6 @@
                 loader.setFilters(filters);
                 // run the thing
 
-                // clear all rows
-                grid.invalidateAllRows();
-                var vp = grid.getViewport();
-                // clear loader data
-                loader.clearData();
-                loader.clearColumns();
-
 
                 // keep a copy of the filter object
                 prevFilterState = filters;
@@ -377,6 +372,14 @@
                 loader.updateTotalCount(function () { loader.ensureData(vp.top, vp.bottom) });
             });
 
+
+            // clear all rows
+            grid.invalidateAllRows();
+            var vp = grid.getViewport();
+            // clear loader data
+            loader.clearData();
+            loader.clearColumns();
+                
             $('#download-submit').click(function (e) {                
                 $("#download-query").val(loader.compileSparqlQuery({ useLimit: false }));
                 window.open('', 'download-window');
@@ -393,7 +396,7 @@
                 return false;
             });
 
-            $(window).resize(function () {;
+            $(window).resize(function () {
                 grid.resizeCanvas();
             });
 

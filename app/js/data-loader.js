@@ -78,8 +78,8 @@
             "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" + 
             "PREFIX qb: <http://purl.org/linked-data/cube#>" + 
             "SELECT * WHERE {" + 
-            "?s a qb:DataStructureDefinition ;" + 
-            "?p ?o ." + 
+            "?datacube a qb:DataStructureDefinition ." + 
+            "?datacube ?p ?o ." + 
             "?o ?x ?y." +
             "?y rdfs:label ?l" + 
             "}";
@@ -113,19 +113,21 @@
                     newQuery += " WHERE {\n";
 
                     for(i in resp.results.bindings)  {
+                        var binding = resp.results.bindings[i];
 
-                        console.log(JSON.stringify(resp.results.bindings[i]));
+                        console.log(JSON.stringify(binding));
                         // if dimension then look for label and filter language
                         // if attribute
-                        console.log(resp.results.bindings[i].x.value);
-                        if(false && resp.results.bindings[i].x.value != "http://purl.org/linked-data/cube#measure") {
-                            newQuery += "?m <" + resp.results.bindings[i].y.value + "> ?" + resp.results.bindings[i].l.value + "Temp.\n" +
-                            "?" + resp.results.bindings[i].l.value + "Temp rdfs:label ?" + resp.results.bindings[i].l.value + ".\n" +
-                            "FILTER (lang(?" + resp.results.bindings[i].l.value + ") = 'de')\n";
+                        console.log(binding.x.value);
+                        if(binding.x.value != "http://purl.org/linked-data/cube#measure") {
+                            newQuery += "?m <" + binding.y.value + "> ?" + binding.l.value + "Temp.\n" +
+                            "OPTIONAL { \n" +
+                            "  ?" + binding.l.value + "Temp rdfs:label ?" + binding.l.value + ".\n" +
+                            "  FILTER(lang(?" + binding.l.value + ") = '' || LANGMATCHES(lang(?" + binding.l.value + "), 'de'))\n" +
+                            "}\n\n";
                         }
-                        else
-                        {
-                            newQuery += "?m <" + resp.results.bindings[i].y.value + "> ?" + resp.results.bindings[i].l.value + ".\n";
+                        else {
+                            newQuery += "?m <" + binding.y.value + "> ?" + binding.l.value + ".\n\n";
                         }
 
                     }
