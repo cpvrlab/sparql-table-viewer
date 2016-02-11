@@ -1,6 +1,6 @@
 
-@import url(https://fonts.googleapis.com/css?family=Roboto);
-@import url(../lib/jquery-dropdown/jquery.dropdown.min.css);
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+@import url('../lib/jquery-dropdown/jquery.dropdown.min.css');
 
 * {
     font-family: arial;
@@ -40,6 +40,7 @@ li {
 #myGrid .slick-header-column {
   font-size: 12px;
   height: 20px;
+  padding: 3px 0px;
   line-height: 20px;
   background: #647AF9;
   color: #fff;

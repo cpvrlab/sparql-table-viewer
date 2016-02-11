@@ -11,7 +11,9 @@
         var dataXHR = [];
         var countXHR = null;
 
-        // temporary filter test data
+        // test dsd query
+        queryDataStructureDefinition();
+
         
         // bundle individual sparql query parts in an object for now
         var sparqlQuery = {
@@ -46,6 +48,131 @@
             columns = [];
         }
         
+
+        // load data cube definition
+        function queryDataStructureDefinition(success) {
+            /*var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+            + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
+            + "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>"
+            + "PREFIX qb: <http://purl.org/linked-data/cube#>"
+            + "SELECT * WHERE { "
+            + "?dataset a qb:DataSet."
+            + "?dataset rdfs:label ?datasetname."
+            + "?dataset rdfs:comment ?datasetcomment."
+            + "?dataset qb:structure ?structure."
+            + "}"; */
+/*
+            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + 
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + 
+            "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" + 
+            "PREFIX qb: <http://purl.org/linked-data/cube#>" + 
+            "SELECT * WHERE {" + 
+            "?s a qb:DataStructureDefinition ;" + 
+            "?p ?o ." + 
+            "?o ?x ?y." + 
+            "BIND(SUBSTR(xsd:string(?y),20) AS ?column) " + 
+            "}";/**/
+
+            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + 
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + 
+            "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" + 
+            "PREFIX qb: <http://purl.org/linked-data/cube#>" + 
+            "SELECT * WHERE {" + 
+            "?s a qb:DataStructureDefinition ;" + 
+            "?p ?o ." + 
+            "?o ?x ?y." +
+            "?y rdfs:label ?l" + 
+            "}";
+
+            // get labels out of ?l 
+            // find a way to get the exact types out of 
+
+            // load dsd and build our query
+            var req = $.ajax({
+                dataType: "json",
+                type: "POST",
+                data: { query: query },
+                url: endPoint,
+                callbackParameter: "callback",
+                Accept: "application/sparql-results+json",
+                cache: true,
+                success: function (resp, textStatus, jqXHR) {
+                    console.log("DSD QUERY RESPONSE:\n");
+                    console.log(JSON.stringify(resp.results.bindings));
+
+
+                    var newQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>\n" +
+                    "\n";
+
+                    // add column selectors
+                    newQuery += "SELECT ";
+                    for(var i in resp.results.bindings)   
+                        newQuery += "?" + resp.results.bindings[i].l.value + " "; // todo: careful, if more than one language this part will fail!
+                    newQuery += " WHERE {\n";
+
+                    for(i in resp.results.bindings)  {
+
+                        console.log(JSON.stringify(resp.results.bindings[i]));
+                        // if dimension then look for label and filter language
+                        // if attribute
+                        console.log(resp.results.bindings[i].x.value);
+                        if(false && resp.results.bindings[i].x.value != "http://purl.org/linked-data/cube#measure") {
+                            newQuery += "?m <" + resp.results.bindings[i].y.value + "> ?" + resp.results.bindings[i].l.value + "Temp.\n" +
+                            "?" + resp.results.bindings[i].l.value + "Temp rdfs:label ?" + resp.results.bindings[i].l.value + ".\n" +
+                            "FILTER (lang(?" + resp.results.bindings[i].l.value + ") = 'de')\n";
+                        }
+                        else
+                        {
+                            newQuery += "?m <" + resp.results.bindings[i].y.value + "> ?" + resp.results.bindings[i].l.value + ".\n";
+                        }
+
+                    }
+                    newQuery += "}";
+
+                    setQuery(newQuery);
+                    ensureData(0, 1000);
+
+                    console.log("\nGENERATED QUERY: \n\n" + newQuery);
+                },
+                error: function () {
+                    console.log("couldn't load dsd");
+                }
+            });
+
+            /* goal query
+
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX u28: <http://environment.data.admin.ch/ubd/28/>
+
+            SELECT ?station ?pollutant ?aggregation ?year  ?measurement ?unit WHERE {
+                ?m a <http://example.org/Measurement> .
+                ?m <http://example.org/measurement> ?measurement.
+                
+                ?m <http://example.org/aggregation> ?a.
+                ?a  rdfs:label ?aggregation.
+                FILTER (lang(?aggregation) = 'de')
+
+                ?m <http://example.org/station> ?s.
+                ?s rdfs:label ?station.
+
+                ?m <http://example.org/unit> ?u.
+                ?u rdfs:label ?unit.
+                FILTER (lang(?unit) = 'de')
+
+                ?m <http://example.org/pollutant> ?p.
+                ?p rdfs:label ?pollutant.
+                FILTER (lang(?pollutant) = 'de')
+
+                ?m <http://example.org/year> ?y
+                BIND(SUBSTR(xsd:string(?y),46) AS ?year)
+            }
+            */
+
+        }
+
         // from and to are 0-based row indices.
         function ensureData(from, to) {
             if (totalCount <= 0)
