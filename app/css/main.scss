@@ -33,37 +33,43 @@ li {
 .text-right {
   text-align: right;
 }
-#myGrid {
-  font-family: 'Roboto', sans-serif;
-  border: 1px solid #1a237e;
-}
-#myGrid .slick-header-column {
-  font-size: 12px;
-  height: 20px;
-  padding: 3px 0px;
-  line-height: 20px;
-  background: #647AF9;
-  color: #fff;
-  border-color: #fff;
-}
-#myGrid .slick-header-column .slick-column-name {
-  padding: 10px;
-}
-#myGrid .slick-row {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.87);
-  line-height: 20px;
-}
-#myGrid .slick-row.active {
-  background-color: #c5cae9;
-}
-#myGrid .slick-row:hover {
-  background-color: #9fa8da;
-}
-#myGrid .slick-row .slick-cell {
-  height: 20px;
-  padding: 0 14px;
-  color: #212121;
+.slickgrid-container {
+    font-family: 'Roboto', sans-serif;
+    border: 1px solid #1a237e;
+
+    .slick-header-column {
+        font-size: 12px;
+        height: 20px;
+        padding: 3px 0px;
+        line-height: 20px;
+        background: #647AF9;
+        color: #fff;
+        border-color: #fff;
+    }
+
+    .slick-header-column .slick-column-name {
+        padding: 10px;
+    }
+
+    .slick-row {
+        font-size: 13px;
+        color: rgba(0, 0, 0, 0.87);
+        line-height: 20px;
+    }
+
+    .slick-row.active {
+        background-color: #c5cae9;
+    }
+
+    .slick-row:hover {
+        background-color: #9fa8da;
+    }
+
+    .slick-row .slick-cell {
+        height: 20px;
+        padding: 0 14px;
+        color: #212121;
+    }
 }
 
 .slick-sort-indicator {
@@ -75,6 +81,7 @@ li {
     left: 9px;
     display: inline-block;
 }
+
 .slick-sort-indicator-asc {
     background: url(../images/sort-asc.gif);
 }
@@ -186,10 +193,6 @@ div.loading-indicator label {
     color: inherit;
     cursor: pointer;
 }
-
-#run-query {
-    margin: 5px;
-} 
 
 .jq-dropdown-menu li.jq-dropdown-loading {
     background: url('../images/loading-small.gif') no-repeat center bottom;
