@@ -1,5 +1,5 @@
-@import url(https://fonts.googleapis.com/css?family=Roboto);
-@import url(../lib/jquery-dropdown/jquery.dropdown.min.css);
+@import url("https://fonts.googleapis.com/css?family=Roboto");
+@import url("../lib/jquery-dropdown/jquery.dropdown.min.css");
 * {
   font-family: arial;
   font-size: 8pt; }
@@ -26,36 +26,31 @@ li {
 .text-right {
   text-align: right; }
 
-#myGrid {
+.slickgrid-container {
   font-family: 'Roboto', sans-serif;
   border: 1px solid #1a237e; }
-
-#myGrid .slick-header-column {
-  font-size: 12px;
-  height: 20px;
-  line-height: 20px;
-  background: #647AF9;
-  color: #fff;
-  border-color: #fff; }
-
-#myGrid .slick-header-column .slick-column-name {
-  padding: 10px; }
-
-#myGrid .slick-row {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.87);
-  line-height: 20px; }
-
-#myGrid .slick-row.active {
-  background-color: #c5cae9; }
-
-#myGrid .slick-row:hover {
-  background-color: #9fa8da; }
-
-#myGrid .slick-row .slick-cell {
-  height: 20px;
-  padding: 0 14px;
-  color: #212121; }
+  .slickgrid-container .slick-header-column {
+    font-size: 12px;
+    height: 20px;
+    padding: 3px 0px;
+    line-height: 20px;
+    background: #647AF9;
+    color: #fff;
+    border-color: #fff; }
+  .slickgrid-container .slick-header-column .slick-column-name {
+    padding: 10px; }
+  .slickgrid-container .slick-row {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.87);
+    line-height: 20px; }
+  .slickgrid-container .slick-row.active {
+    background-color: #c5cae9; }
+  .slickgrid-container .slick-row:hover {
+    background-color: #9fa8da; }
+  .slickgrid-container .slick-row .slick-cell {
+    height: 20px;
+    padding: 0 14px;
+    color: #212121; }
 
 .slick-sort-indicator {
   width: 9px;
@@ -164,9 +159,6 @@ div.loading-indicator label {
   background-color: #E9F4FF;
   color: inherit;
   cursor: pointer; }
-
-#run-query {
-  margin: 5px; }
 
 .jq-dropdown-menu li.jq-dropdown-loading {
   background: url("../images/loading-small.gif") no-repeat center bottom;
