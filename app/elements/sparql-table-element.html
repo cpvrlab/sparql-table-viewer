@@ -35,6 +35,13 @@
     </div>
     <br>
     <br>
+        <select id="language-select">
+            <option>de</option>
+            <option>fr</option>
+            <option>it</option>
+            <option>en</option>
+        </select>
+
     <div id="myGrid" style="width:100%;height: 490px;"></div>
     <br>
     <form id="download-form" method="post" action="http://test.lindas-data.ch/sparql" target="download-window">
@@ -117,6 +124,15 @@
         grid = new Slick.Grid("#myGrid", loader.data, [], options);
 
         $(function () {
+
+            loader.onLanguageOptionsRetrieved.subscribe(function(e, args) {
+                var languageSelect = $('#language-select');
+                languageSelect.html("");
+                $.each(args, function() {
+                    languageSelect.append($("<option />").val(this).text(this));
+                });
+            });
+
             loader.onDataLoading.subscribe(function (e, args) {
                 if (!loadingIndicator) {
                     var g = $("#myGrid");
@@ -384,6 +400,16 @@
                 $("#download-query").val(loader.compileSparqlQuery({ useLimit: false }));
                 window.open('', 'download-window');
                 document.getElementById('download-form').submit();
+            });
+
+            $('#language-select').on("change", function(e) {
+                // clear all rows
+                grid.invalidateAllRows();
+                var vp = grid.getViewport();
+                // clear loader data
+                loader.clearData();
+                loader.clearColumns();
+                loader.setLanguage($( "#language-select option:selected" ).text());
             });
 
             // update the query textbox with the new text

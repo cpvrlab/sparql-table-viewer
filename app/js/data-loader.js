@@ -10,9 +10,11 @@
         var distinctValues = {}; // distinct column values: { "station" : ["Aarau", "Aargau"], ... }
         var dataXHR = [];
         var countXHR = null;
+        var languages = [];
+        var selectedLang = "";
 
-        // test dsd query
-        queryDataStructureDefinition();
+        // query language options before querying the data cube
+        queryLanguageOptions(queryDataStructureDefinition);
 
         
         // bundle individual sparql query parts in an object for now
@@ -32,6 +34,7 @@
         var onRowCountChanged = new Slick.Event();
         var onFilterValuesRetrieved = new Slick.Event();
         var onErrorOccurred = new Slick.Event();
+        var onLanguageOptionsRetrieved = new Slick.Event();
 
         function clearData() {
             for (var key in data) {
@@ -48,6 +51,52 @@
             columns = [];
         }
         
+
+        function queryLanguageOptions(complete)
+        {
+            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "select distinct ?languages where {" +
+                "?s rdfs:label ?o." +
+                "BIND(LANG(?o) as ?languages)} ";
+
+            var req = $.ajax({
+                dataType: "json",
+                type: "POST",
+                data: { query: query },
+                url: endPoint,
+                callbackParameter: "callback",
+                Accept: "application/sparql-results+json",
+                cache: true,
+                success: function (resp, textStatus, jqXHR) {
+
+
+                    for(var i in resp.results.bindings) {
+                        var result = resp.results.bindings[i].languages.value;
+
+                        if(result !== "")
+                            languages.push(result);
+                    }
+
+                    if(result.length > 0)
+                        selectedLang = languages[0];
+
+                    onLanguageOptionsRetrieved.notify(languages);
+
+
+
+                    if(complete)
+                        complete();
+                },
+                error: function () {
+                    console.log("couldn't load dsd");
+                }
+            });
+        }
+
+        function setLanguage(lang) {
+            selectedLang = lang;
+            queryDataStructureDefinition();
+        }
 
         // load data cube definition
         function queryDataStructureDefinition(success) {
@@ -123,7 +172,7 @@
                             newQuery += "?m <" + binding.y.value + "> ?" + binding.l.value + "Temp.\n" +
                             "OPTIONAL { \n" +
                             "  ?" + binding.l.value + "Temp rdfs:label ?" + binding.l.value + ".\n" +
-                            "  FILTER(lang(?" + binding.l.value + ") = '' || LANGMATCHES(lang(?" + binding.l.value + "), 'de'))\n" +
+                            "  FILTER(lang(?" + binding.l.value + ") = '' || LANGMATCHES(lang(?" + binding.l.value + "), '" + selectedLang + "'))\n" +
                             "}\n\n";
                         }
                         else {
@@ -133,10 +182,10 @@
                     }
                     newQuery += "}";
 
+                    console.log("\nGENERATED QUERY: \n\n" + newQuery);
                     setQuery(newQuery);
                     ensureData(0, 1000);
 
-                    console.log("\nGENERATED QUERY: \n\n" + newQuery);
                 },
                 error: function () {
                     console.log("couldn't load dsd");
@@ -221,6 +270,7 @@
         }
 
         function setQuery(query, complete) {
+            console.log("setquery");
             // extract the prologue from the query (PREFIX|BASE)
             // probably better to change later to a sparql parser https://github.com/RubenVerborgh/SPARQL.js
             var re = /.*(PREFIX|BASE).*\n/g; 
@@ -228,7 +278,7 @@
             sparqlQuery.prologue = "";
             sparqlQuery.query = query;
                 
-            while ((prologue = re.exec(query)) !== null) {
+            while((prologue = re.exec(query)) !== null) {
                 sparqlQuery.prologue += prologue[0] ;
                 sparqlQuery.query = sparqlQuery.query.replace(prologue[0], '');
             }
@@ -561,6 +611,7 @@
             "compileSparqlQuery": compileSparqlQuery,
             "updateTotalCount": updateTotalCount,
             "requestFilterData": requestFilterData,
+            "setLanguage": setLanguage,
 
             // events
             "onDataLoading": onDataLoading,
@@ -568,7 +619,8 @@
             "onColumnsChanged": onColumnsChanged,
             "onRowCountChanged": onRowCountChanged,
             "onFilterValuesRetrieved": onFilterValuesRetrieved,
-            "onErrorOccurred": onErrorOccurred
+            "onErrorOccurred": onErrorOccurred,
+            "onLanguageOptionsRetrieved": onLanguageOptionsRetrieved
         };
     }
 
