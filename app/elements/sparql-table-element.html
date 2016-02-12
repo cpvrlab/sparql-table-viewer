@@ -41,6 +41,7 @@
             <option>it</option>
             <option>en</option>
         </select>
+        <a href="#" id="clear-filters">clear filters</a>
 
     <div id="myGrid" style="width:100%;height: 490px;"></div>
     <br>
@@ -400,6 +401,25 @@
                 $("#download-query").val(loader.compileSparqlQuery({ useLimit: false }));
                 window.open('', 'download-window');
                 document.getElementById('download-form').submit();
+            });
+
+            $("#clear-filters").on("click", function(e) {
+                var columns = grid.getColumns();
+                // calling set filters without a parameter should clear the query
+                loader.setFilters([]);
+                // and this will force our filter dropdowns to be regenerated
+                for (var i in columns) {
+                    reloadFilters[columns[i].id] = true;   
+                    prevFilterState[columns[i].id] = { selectedLength: 0 }
+                    console.log("marking " + columns[i].id + " for reloading");                 
+                }
+
+
+                // scroll to top to make sure there's data in our viewport
+                grid.scrollRowToTop(0);
+                var vp = grid.getViewport();
+                loader.clearData();
+                loader.updateTotalCount(function () { loader.ensureData(vp.top, vp.bottom) });
             });
 
             $('#language-select').on("change", function(e) {
