@@ -75,7 +75,7 @@ gulp.task('copy', function() {
 // gh pages deploy task
 gulp.task('deploy-gh-pages', function() {
     return gulp.src('./dist/**/*')
-    .pipe(ghPages({push: false, message: "update"}));
+    .pipe(ghPages({push: true, message: "update"}));
 });
 
 gulp.task('deploy', function(cb) {

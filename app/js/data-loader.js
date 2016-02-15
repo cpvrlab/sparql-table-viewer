@@ -13,9 +13,6 @@
         var languages = [];
         var selectedLang = "";
 
-        // query language options before querying the data cube
-        queryLanguageOptions(queryDataStructureDefinition);
-
         
         // bundle individual sparql query parts in an object for now
         var sparqlQuery = {
@@ -35,6 +32,11 @@
         var onFilterValuesRetrieved = new Slick.Event();
         var onErrorOccurred = new Slick.Event();
         var onLanguageOptionsRetrieved = new Slick.Event();
+
+        function initFromDataCube() {            
+            queryLanguageOptions(queryDataStructureDefinition);
+        }
+
 
         function clearData() {
             for (var key in data) {
@@ -612,6 +614,7 @@
             "updateTotalCount": updateTotalCount,
             "requestFilterData": requestFilterData,
             "setLanguage": setLanguage,
+            "initFromDataCube": initFromDataCube,
 
             // events
             "onDataLoading": onDataLoading,
