@@ -42,7 +42,10 @@
             <option>it</option>
             <option>en</option>
         </select>
-        <a href="#" class="clear-filters">clear filters</a>
+        <a href="#" class="clear-filters">clear filters</a> | 
+
+        share link: 
+        <input class="share-link" onClick="this.setSelectionRange(0, this.value.length)" value="Sample Text" />
 
     <div class="slickgrid-container" style="width:100%;height: 490px;"></div>
     <br>
@@ -72,16 +75,8 @@
 </div></content>
   </template>
 
+    <link rel="import" href="imports.html">
 
-    <script type="text/javascript" src="../lib/jQuery/jquery-1.11.3.min.js"></script>
-    <script type="text/javascript" src="../lib/SlickGrid/lib/jquery.event.drag-2.2.js"></script>
-    <script type="text/javascript" src="../lib/SlickGrid/lib/jquery-ui-1.8.16.custom.min.js"></script>
-    <script type="text/javascript" src="../lib/SlickGrid/slick.core.js"></script>
-    <script type="text/javascript" src="../lib/SlickGrid/slick.grid.js"></script>
-    <script type="text/javascript" src="../lib/CodeMirror/codemirror.js"></script>
-    <script type="text/javascript" src="../lib/CodeMirror/mode/sparql/sparql.js"></script>
-    <script type="text/javascript" src="../lib/jquery-dropdown/jquery.dropdown.js"></script>
-    <script type="text/javascript" src="../js/app.min.js"></script>
   <script>
   Polymer({
     /* this is the element's prototype */
@@ -93,6 +88,23 @@
     ready: function() {
       //alert(this.endpoint);
 
+        var endpoint = getParameterByName("endpoint");
+        var dsd = getParameterByName("dsd");
+        if(endpoint === null)
+            endpoint = this.endpoint;
+        if(dsd === null)
+            dsd = this.dsd;
+
+      // get query strings http://stackoverflow.com/a/901144
+      function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
 
 
         // demo js
@@ -123,9 +135,9 @@
         var uniqueElementId = $(".elementcontainer").length;
 
         var slickgridContainer = $elementContainer.children(".slickgrid-container")[0];
-        console.log(slickgridContainer);
-        loader = new udb.DataLoader(this.endpoint, PAGESIZE, PAGESIZE * 0.3);
-        loader.initFromDataCube();
+
+        loader = new udb.DataLoader(endpoint, PAGESIZE, PAGESIZE * 0.3);
+        loader.initFromDataCube(dsd);
 
 
         grid = new Slick.Grid(slickgridContainer, loader.data, [], options);
@@ -140,6 +152,7 @@
         });
 
         $(function () {
+            updateShareLink();
 
             loader.onLanguageOptionsRetrieved.subscribe(function(e, args) {
                 var languageSelect = $elementContainer.find(".language-select").first();
@@ -234,7 +247,6 @@
             });
 
             loader.onFilterValuesRetrieved.subscribe(function (e, args) {
-                console.log("filter values updated");
                 //console.log("Loaded filter values for " + args.column);
                 var $selector = $('#jq-dropdown-' + args.column + uniqueElementId.toString() + " .jq-dropdown-menu");
 
@@ -296,7 +308,6 @@
                     '       <li class="jq-dropdown-loading">loading</li>' +
                     '    </ul>' +
                     '</div>').appendTo($container);
-                    console.log(uniqueId);
                     // note: workaround for this: http://stackoverflow.com/a/643664
                     var testFunc = (function (columnId) {
                         return function () {
@@ -304,9 +315,7 @@
                             // attach a callback to the just created dropdown to receive list data
                             // only after it's been opened for the first time
                              $elementContainer.find("#" + uniqueId).first().on("show", function () {
-                                    console.log("hi");
                                 if (reloadFilters[columnId]) {
-                                    console.log("hi");
                                     // show loading bar again 
                                     $(this).find(".jq-dropdown-menu").html('<li class="jq-dropdown-loading">loading</li>');
 
@@ -341,7 +350,6 @@
                     '    <span><a href="#" class="bfu-filter-dropdown" data-jq-dropdown="#' + uniqueId + '" ></a></span>'
                 '</div>"';
                 $(filterMenu).appendTo(args.node);
-                console.log("header rendered");
             });
 
             // handle filter checkbox change
@@ -431,8 +439,7 @@
                 // and this will force our filter dropdowns to be regenerated
                 for (var i in columns) {
                     reloadFilters[columns[i].id] = true;   
-                    prevFilterState[columns[i].id] = { selectedLength: 0 }
-                    console.log("marking " + columns[i].id + " for reloading");                 
+                    prevFilterState[columns[i].id] = { selectedLength: 0 }              
                 }
 
 
@@ -467,6 +474,12 @@
                 grid.resizeCanvas();
             });
 
+
+            function updateShareLink()
+            {
+
+                $elementContainer.find(".share-link").first().val(window.location.href.split('?')[0] + "?endpoint=" + encodeURIComponent(endpoint) + "&query=" + encodeURIComponent(dsd));
+            };
         });
     }
   });

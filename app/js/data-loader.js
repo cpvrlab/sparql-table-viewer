@@ -12,6 +12,7 @@
         var countXHR = null;
         var languages = [];
         var selectedLang = "";
+        var datastructuredefinition = "";
 
         
         // bundle individual sparql query parts in an object for now
@@ -33,7 +34,8 @@
         var onErrorOccurred = new Slick.Event();
         var onLanguageOptionsRetrieved = new Slick.Event();
 
-        function initFromDataCube() {            
+        function initFromDataCube(dsd) {  
+            datastructuredefinition = dsd;         
             queryLanguageOptions(queryDataStructureDefinition);
         }
 
@@ -113,17 +115,7 @@
             + "?dataset qb:structure ?structure."
             + "}"; */
 /*
-            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + 
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + 
-            "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" + 
-            "PREFIX qb: <http://purl.org/linked-data/cube#>" + 
-            "SELECT * WHERE {" + 
-            "?s a qb:DataStructureDefinition ;" + 
-            "?p ?o ." + 
-            "?o ?x ?y." + 
-            "BIND(SUBSTR(xsd:string(?y),20) AS ?column) " + 
-            "}";/**/
-
+            
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + 
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + 
             "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" + 
@@ -131,6 +123,16 @@
             "SELECT * WHERE {" + 
             "?datacube a qb:DataStructureDefinition ." + 
             "?datacube ?p ?o ." + 
+            "?o ?x ?y." +
+            "?y rdfs:label ?l" + 
+            "}";/**/
+
+            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + 
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + 
+            "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" + 
+            "PREFIX qb: <http://purl.org/linked-data/cube#>" + 
+            "SELECT * WHERE {" + 
+            "<" + datastructuredefinition + "> ?p ?o ." + 
             "?o ?x ?y." +
             "?y rdfs:label ?l" + 
             "}";
@@ -148,8 +150,8 @@
                 Accept: "application/sparql-results+json",
                 cache: true,
                 success: function (resp, textStatus, jqXHR) {
-                    console.log("DSD QUERY RESPONSE:\n");
-                    console.log(JSON.stringify(resp.results.bindings));
+                    //console.log("DSD QUERY RESPONSE:\n");
+                    //console.log(JSON.stringify(resp.results.bindings));
 
 
                     var newQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
@@ -166,10 +168,8 @@
                     for(i in resp.results.bindings)  {
                         var binding = resp.results.bindings[i];
 
-                        console.log(JSON.stringify(binding));
                         // if dimension then look for label and filter language
                         // if attribute
-                        console.log(binding.x.value);
                         if(binding.x.value != "http://purl.org/linked-data/cube#measure") {
                             newQuery += "?m <" + binding.y.value + "> ?" + binding.l.value + "Temp.\n" +
                             "OPTIONAL { \n" +
@@ -184,7 +184,7 @@
                     }
                     newQuery += "}";
 
-                    console.log("\nGENERATED QUERY: \n\n" + newQuery);
+                    //console.log("\nGENERATED QUERY: \n\n" + newQuery);
                     setQuery(newQuery);
                     ensureData(0, 1000);
 
@@ -272,7 +272,6 @@
         }
 
         function setQuery(query, complete) {
-            console.log("setquery");
             // extract the prologue from the query (PREFIX|BASE)
             // probably better to change later to a sparql parser https://github.com/RubenVerborgh/SPARQL.js
             var re = /.*(PREFIX|BASE).*\n/g; 
@@ -314,7 +313,6 @@
             // of sort values.
             // if only one value is selected we can just add FILTER(?column = "value")
             // if all but one value is selected we can use FILTER(?column != "value")
-
             
 
             sparqlQuery.filters = {};
