@@ -51,24 +51,20 @@ li {
     height: 20px;
     padding: 0 14px;
     color: #212121; }
-
-.slick-sort-indicator {
-  width: 9px;
-  height: 5px;
-  margin-left: 4px;
-  margin-top: 8px;
-  position: absolute;
-  left: 9px;
-  display: inline-block; }
-
-.slick-sort-indicator-asc {
-  background: url(../images/sort-asc.gif); }
-
-.slick-sort-indicator-desc {
-  background: url(../images/sort-desc.gif); }
-
-.slick-header-column-sorted .slick-column-name {
-  margin-left: 16px; }
+  .slickgrid-container .slick-sort-indicator {
+    width: 9px;
+    height: 5px;
+    margin-left: 4px;
+    margin-top: 8px;
+    position: absolute;
+    left: 9px;
+    display: inline-block; }
+  .slickgrid-container .slick-sort-indicator-asc {
+    background: url(../images/sort-asc.gif); }
+  .slickgrid-container .slick-sort-indicator-desc {
+    background: url(../images/sort-desc.gif); }
+  .slickgrid-container .slick-header-column-sorted .slick-column-name {
+    margin-left: 16px; }
 
 div.loading-indicator {
   display: block;
