@@ -30,7 +30,7 @@ var paths = {
 
 // Delete the dist directory
 gulp.task('clean', function() {
-    return del(bases.dist);
+    return del.sync(bases.dist);
 });
 
 // Process scripts and concatenate them into one output file
@@ -79,7 +79,7 @@ gulp.task('deploy-gh-pages', function() {
 });
 
 gulp.task('deploy', function(cb) {
-    runSequence('default',
+    runSequence('build',
         'deploy-gh-pages', 
         cb);
 });

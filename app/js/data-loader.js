@@ -13,7 +13,8 @@
         var languages = [];
         var selectedLang = "";
         var datastructuredefinition = "";
-
+        var datasetname = "";
+        var datasetcomment = "";
         
         // bundle individual sparql query parts in an object for now
         var sparqlQuery = {
@@ -33,11 +34,13 @@
         var onFilterValuesRetrieved = new Slick.Event();
         var onErrorOccurred = new Slick.Event();
         var onLanguageOptionsRetrieved = new Slick.Event();
+        var onDatasetMetadataRetrieved = new Slick.Event();
 
         function initFromDataCube(dsd, initialFilter) {  
             initialFilter = initialFilter || [];
             datastructuredefinition = dsd;         
             queryLanguageOptions(function() {
+                queryDataStructureMetadata();
                 queryDataStructureDefinition(function() {
                     setFilters(initialFilter);
                 });
@@ -78,9 +81,9 @@
                 cache: true,
                 success: function (resp, textStatus, jqXHR) {
 
-
+                    var result;
                     for(var i in resp.results.bindings) {
-                        var result = resp.results.bindings[i].languages.value;
+                        result = resp.results.bindings[i].languages.value;
 
                         if(result !== "")
                             languages.push(result);
@@ -107,19 +110,44 @@
             queryDataStructureDefinition();
         }
 
+        function queryDataStructureMetadata() {
+
+            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" +
+            "PREFIX qb: <http://purl.org/linked-data/cube#>" +
+            "SELECT ?datasetname ?datasetcomment WHERE { " +
+            "<" + datastructuredefinition + "> a qb:DataStructureDefinition ." +
+            "?dataset a qb:DataSet." +
+            "?dataset rdfs:label ?datasetname." +
+            "?dataset rdfs:comment ?datasetcomment." +
+            "?dataset qb:structure <" + datastructuredefinition + ">" +
+            "}";
+
+
+            var req = $.ajax({
+                dataType: "json",
+                type: "POST",
+                data: { query: query },
+                url: endPoint,
+                callbackParameter: "callback",
+                Accept: "application/sparql-results+json",
+                cache: true,
+                success: function (resp, textStatus, jqXHR) {
+                    
+                        datasetname = resp.results.bindings[0].datasetname.value;
+                        datasetcomment = resp.results.bindings[0].datasetcomment.value;
+                        onDatasetMetadataRetrieved.notify({name: datasetname, comment: datasetcomment });
+
+                },
+                error: function () {
+                    console.log("couldn't dataset name and comment");
+                }
+            });
+        }
+
         // load data cube definition
-        function queryDataStructureDefinition(complete) {
-            /*var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-            + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
-            + "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>"
-            + "PREFIX qb: <http://purl.org/linked-data/cube#>"
-            + "SELECT * WHERE { "
-            + "?dataset a qb:DataSet."
-            + "?dataset rdfs:label ?datasetname."
-            + "?dataset rdfs:comment ?datasetcomment."
-            + "?dataset qb:structure ?structure."
-            + "}"; */
-/*
+        function queryDataStructureDefinition(complete) {/*
             
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + 
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + 
@@ -132,11 +160,13 @@
             "?y rdfs:label ?l" + 
             "}";/**/
 
+
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + 
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + 
             "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" + 
             "PREFIX qb: <http://purl.org/linked-data/cube#>" + 
             "SELECT * WHERE {" + 
+            "<" + datastructuredefinition + "> a qb:DataStructureDefinition ." +
             "<" + datastructuredefinition + "> ?p ?o ." + 
             "?o ?x ?y." +
             "?y rdfs:label ?l" + 
@@ -328,11 +358,11 @@
                 // continue if the filter has everything selected
                 // or is not loaded at all
                 if (/*typeof distinctValues[column] === 'undefined' || */
-                    (filterValues.values.length == 0)) {
+                    (filterValues.values.length === 0)) {
                     return true;
                 }
 
-                var moreSelected = filterValues.moreSelected == true || filterValues.moreSelected == "true";
+                var moreSelected = filterValues.moreSelected === true || filterValues.moreSelected == "true";
 
 
                 sparqlQuery.filters[column] = sparqlQuery.filters[column] || "";
@@ -613,7 +643,8 @@
             "onRowCountChanged": onRowCountChanged,
             "onFilterValuesRetrieved": onFilterValuesRetrieved,
             "onErrorOccurred": onErrorOccurred,
-            "onLanguageOptionsRetrieved": onLanguageOptionsRetrieved
+            "onLanguageOptionsRetrieved": onLanguageOptionsRetrieved,            
+            "onDatasetMetadataRetrieved": onDatasetMetadataRetrieved
         };
     }
 

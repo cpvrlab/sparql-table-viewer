@@ -26,8 +26,8 @@
     </form> 
     <div>
         <h1>Raum, Umwelt</h1>
-        <h2>Luftqualität Schweiz (Jahreswerte)</h2>
-        <p>Messdaten (Jahreswerte) von nationalen, kantonalen und kommunalen Messstationen für Luftschadstoffe, zusammengestellt durch die Schweizerische Gesellschaft der Lufthygiene-Fachleute (Cercl'Air) und das BAFU</p>
+        <h2 class="datasetname">Title</h2>
+        <p class="datasetcomment">Description</p>
         <p>1.1.1984 - 31.12.2014</p>
     </div>
     <div style="float: right">
@@ -178,6 +178,11 @@
 
         $(function () {
             updateShareLink();
+
+            loader.onDatasetMetadataRetrieved.subscribe(function(e, args) {
+                $elementContainer.find(".datasetname").first().html(args.name);
+                $elementContainer.find(".datasetcomment").first().html(args.comment);
+            });
 
             loader.onLanguageOptionsRetrieved.subscribe(function(e, args) {
                 var languageSelect = $elementContainer.find(".language-select").first();
