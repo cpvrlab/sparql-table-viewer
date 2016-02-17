@@ -34,9 +34,14 @@
         var onErrorOccurred = new Slick.Event();
         var onLanguageOptionsRetrieved = new Slick.Event();
 
-        function initFromDataCube(dsd) {  
+        function initFromDataCube(dsd, initialFilter) {  
+            initialFilter = initialFilter || [];
             datastructuredefinition = dsd;         
-            queryLanguageOptions(queryDataStructureDefinition);
+            queryLanguageOptions(function() {
+                queryDataStructureDefinition(function() {
+                    setFilters(initialFilter);
+                });
+            });
         }
 
 
@@ -103,7 +108,7 @@
         }
 
         // load data cube definition
-        function queryDataStructureDefinition(success) {
+        function queryDataStructureDefinition(complete) {
             /*var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
             + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
             + "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>"
@@ -186,6 +191,8 @@
 
                     //console.log("\nGENERATED QUERY: \n\n" + newQuery);
                     setQuery(newQuery);
+                    if(complete)
+                        complete();
                     ensureData(0, 1000);
 
                 },
@@ -314,64 +321,53 @@
             // if only one value is selected we can just add FILTER(?column = "value")
             // if all but one value is selected we can use FILTER(?column != "value")
             
+            console.log("Filters: ");
+            console.log(filters);
 
             sparqlQuery.filters = {};
             $.each(filters, function (column, filterValues) {
-
+                console.log(distinctValues[column]);
                 // continue if the filter has everything selected
                 // or is not loaded at all
-                if (typeof distinctValues[column] === 'undefined' || 
-                    filterValues.selectedLength == distinctValues[column].length) {
+                if (/*typeof distinctValues[column] === 'undefined' || */
+                    (filterValues.values.length == 0)) {
                     return true;
                 }
 
-                var lessSelectedValues = true;
-                // note: special case for 0 selected elements, then we force
-                //       a filter that looks like this FILTER(?column != "value" || ...)
-                //       so that we recieve a 0 result. 
-                // todo:    I'm unsure if we really need this since it is clear that 
-                //          we'll recieve a count of 0 and there will be nothing to 
-                //          display. I'll leave it in for now.
-                //          The other option would be to ignore the filter but that would
-                //          be strange behaviour..., so we'll leave it here I guess.
-                if (0.5 * distinctValues[column].length < filterValues.selectedLength || 
-                    filterValues.selectedLength === 0) {
-                    lessSelectedValues = false;
-                }
+                var moreSelected = filterValues.moreSelected == true || filterValues.moreSelected == "true";
+
+
                 sparqlQuery.filters[column] = sparqlQuery.filters[column] || "";
                 sparqlQuery.filters[column] += "FILTER(";
 
-                var filterCounter = 0;
                 $.each(filterValues.values, function (i, val) {
-                    // skip if we don't need the current value for our filter
-                    if (lessSelectedValues && !val.isSelected ||
-                        !lessSelectedValues && val.isSelected)
-                        return true;
 
                     // default connector and comperator if we're using unchecked values
                     // then we want to filter with these two
                     var connector = " && ";
                     var comperator = " != ";
-                    var isLastElement = filterCounter == (filterValues.values.length - filterValues.selectedLength - 1);
-                    if (lessSelectedValues) {
+                    var isLastElement = filterValues.values.length - 1 == i;
+                    if (!moreSelected) {
                         // if however there are less selected values than unchecked ones
                         // then we want to use the selected values for filtering
                         connector = " || ";
                         comperator = " = ";
-                        isLastElement = filterCounter == (filterValues.selectedLength - 1);
                     }
                     
                     sparqlQuery.filters[column] +=
-                        "STR(?" + column + ")" + comperator + "\"" + val.value + "\"";
+                        "STR(?" + column + ")" + comperator + "\"" + val + "\"";
 
                     if (!isLastElement)
                         sparqlQuery.filters[column] += connector;
 
-                    filterCounter++;
                 });
 
                 sparqlQuery.filters[column] += ")\n";
-            });                      
+
+                console.log("NEW FILTERS ");
+                console.log(sparqlQuery.filters[column]);    
+            }); 
+                 
         }
 
         function requestFilterData(columnId)

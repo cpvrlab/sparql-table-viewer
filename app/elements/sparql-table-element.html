@@ -96,6 +96,16 @@
         if(queryString === null)
             queryString = decodeURIComponent(this.query);
 
+
+        var filtersFromQuerystring = null;
+        if(window.location.href.split('?')[1] !== undefined)
+        {
+            filtersFromQuerystring = QueryStringToHash(window.location.href.split('?')[1]).filter;
+            if(filtersFromQuerystring === undefined)
+                filtersFromQuerystring = null;
+        }
+
+
       // get query strings http://stackoverflow.com/a/901144
         function getParameterByName(name, url) {
             if (!url) url = window.location.href;
@@ -105,6 +115,19 @@
             if (!results) return null;
             if (!results[2]) return '';
             return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        serialize = function(obj, prefix) {
+          var str = [];
+          for(var p in obj) {
+            if (obj.hasOwnProperty(p)) {
+              var k = prefix ? prefix + "[" + p + "]" : p, v = obj[p];
+              str.push(typeof v == "object" ?
+                serialize(v, k) :
+                encodeURIComponent(k) + "=" + encodeURIComponent(v));
+            }
+          }
+          return str.join("&");
         }
 
 
@@ -128,7 +151,7 @@
         var loadingIndicator;
         var downloadURL;
         var viewportChangedTimer;
-        var prevFilterState;
+        var prevFilterState = {};
         var reloadFilters;
         // very ugly way of getting the elementcontainer for only this element
         // there is a better way for sure but I don't care atm.
@@ -139,7 +162,19 @@
         var slickgridContainer = $elementContainer.children(".slickgrid-container")[0];
 
         loader = new udb.DataLoader(endpoint, PAGESIZE, PAGESIZE * 0.3);
-        loader.setQuery(queryString);
+        
+        // ew..
+        if(filtersFromQuerystring != null) {
+            prevFilterState = filtersFromQuerystring;
+            filtersFromQuerystring = null;
+            loader.setFilters(prevFilterState);
+            loader.setQuery(queryString);
+            console.log("bkle");
+        }
+        else
+            loader.setQuery(queryString);
+
+
         grid = new Slick.Grid(slickgridContainer, loader.data, [], options);
 
 
@@ -263,17 +298,23 @@
                 for (var i in args.values) {
                     var setChecked = true;
                     // restore previous state of this filter
-                    if (typeof prevFilterState !== "undefined") {
+                    if (typeof prevFilterState[args.column] !== "undefined") {
                         if (typeof prevFilterState[args.column].values !== "undefined" &&
                             prevFilterState[args.column].values.length > 0) {
+                            // there are elements selected and deselected so uncheck allchecked
+                            setCheckAllChecked = false;
                             // using jquery grep to search for a specific property in the values array
                             var element = $.grep(prevFilterState[args.column].values, function (e) {
-                                return e.value == args.values[i];
+                                return e == args.values[i];
                             });
-                            if (typeof element[0] !== "undefined")
-                                setChecked = element[0].isSelected;
-                            if (setChecked == false)
-                                setCheckAllChecked = false;
+                                // if array contains unselected elements (moreSelected=true)
+                                // then we want to select all the not found elements 
+                                if(prevFilterState[args.column].moreSelected)
+                                    setChecked = typeof element[0] === "undefined";
+                                // else we want to select the found objects
+                                else
+                                    setChecked = typeof element[0] !== "undefined";                               
+                            
                         }
                     }
                     html += '<li><label><input type="checkbox" value="' + args.values[i] + '" ' + ((setChecked) ? 'checked' : '') + '/>' + args.values[i] + '</label></li>';
@@ -302,7 +343,6 @@
                 $container.html("");
 
                 reloadFilters = {};
-                prevFilterState = {};
                 // add a dropdown for each column and initialize its content with a spinner
                 for (var col in columns) {
                     var uniqueId = 'jq-dropdown-' + columns[col].id + uniqueElementId.toString();
@@ -337,9 +377,6 @@
 
                     // mark filters for this column for reloading
                     reloadFilters[columns[col].id] = true;
-
-                    // initialize the prevFilterState with zero lengths
-                    prevFilterState[columns[col].id] = { selectedLength: 0 }
                 }
 
             });
@@ -364,8 +401,9 @@
                 // go over each filter dropdown state
                 var columns = grid.getColumns();
                 for (var i in columns) {
-                    var values = [];
-                    var selectedCount = 0;
+                    var valuesSelected = [];
+                    var valuesNotSelected = [];
+                    var totalCount = 0;
 
                     var uniqueId = '#jq-dropdown-' + columns[i].id + uniqueElementId.toString();
 
@@ -373,14 +411,15 @@
                     $selector.not(".checkall").each(function () {
                         var selected = $(this).prop("checked");
                         if (selected) 
-                            selectedCount++;
-                        
-                        
-                        values.push({ value: $(this).val(), isSelected: selected });
+                            valuesSelected.push($(this).val());
+                        else
+                            valuesNotSelected.push($(this).val());
+
+                        totalCount++;
                     });
 
                     // deselect the 'selectall' checkbox if not all filters are checked
-                    if (selectedCount != values.length) {
+                    if (valuesSelected.length != totalCount) {
                         $elementContainer.find(uniqueId).first().find(".checkall").prop("checked", false);
 
                         // set the icon
@@ -391,21 +430,23 @@
                         $elementContainer.find(uniqueId).first().removeClass("active");
                     }
 
-
-                    filters[columns[i].id] = { selectedLength: selectedCount, values: values};
+                    var moreSelected = (valuesNotSelected.length < valuesSelected.length);
+                    var values = (moreSelected) ? valuesNotSelected : valuesSelected;
+                    if(valuesSelected.length < totalCount)
+                    filters[columns[i].id] = { moreSelected: moreSelected, values: values};
 
                     // keep track on what column changed
-                    if(prevFilterState[columns[i].id].selectedLength != selectedCount)
-                        changedColumn = columns[i].id;
+                    if(prevFilterState[columns[i].id] !== "undefined" ||
+                        prevFilterState[columns[i].id].values.length != values.length ||
+                        prevFilterState[columns[i]].id.moreSelected != moreSelected) {
+                        changedColumn = columns[i].id;                    
+                    }
                 }
                 //console.log(filters);
-                
                 loader.setFilters(filters);
-                // run the thing
 
-
-                // keep a copy of the filter object
                 prevFilterState = filters;
+                updateShareLink();
 
                 // mark other filters for reload
                 // todo: this current method will cause tons of events to accumulate, this has to be changed soon
@@ -463,7 +504,11 @@
                 // and this will force our filter dropdowns to be regenerated
                 for (var i in columns) {
                     reloadFilters[columns[i].id] = true;   
-                    prevFilterState[columns[i].id] = { selectedLength: 0 }              
+
+                    if(filtersFromQuerystring == null)
+                        prevFilterState = { }       
+
+                    updateShareLink();       
                 }
 
 
@@ -492,11 +537,60 @@
 
             function updateShareLink()
             {
+                var shareLink = window.location.href.split('?')[0] + 
+                "?endpoint=" + encodeURIComponent(endpoint) + 
+                "&query=" + encodeURIComponent(queryString);
 
-                $elementContainer.find(".share-link").first().val(window.location.href.split('?')[0] + "?endpoint=" + encodeURIComponent(endpoint) + "&query=" + encodeURIComponent(queryEditor.getValue()));
+                if(!jQuery.isEmptyObject(prevFilterState))
+                    shareLink += "&" + jQuery.param({filter: prevFilterState});
+
+                $elementContainer.find(".share-link").first().val(shareLink);
             };
 
         });
+        // http://stackoverflow.com/a/3401265
+        function QueryStringToHash(query){
+          var setValue = function(root, path, value){
+            if(path.length > 1){
+              var dir = path.shift();
+              if( typeof root[dir] == 'undefined' ){
+                root[dir] = path[0] == '' ? [] : {};
+              }
+
+              arguments.callee(root[dir], path, value);
+            }else{
+              if( root instanceof Array ){
+                root.push(value);
+              }else{
+                root[path] = value;
+              }
+            }
+          };
+          var nvp = query.split('&');
+          var data = {};
+          for( var i = 0 ; i < nvp.length ; i++ ){
+            var pair = nvp[i].split('=');
+            var name = decodeURIComponent(pair[0]);
+            pair[1] = pair[1].replace(/\+/g,' '); // replace pluses with spaces before decoding
+            var value = decodeURIComponent(pair[1]);
+            if(value == "true" || value == "false")
+                value = (value == "true" || value != "false");
+
+            var path = name.match(/(^[^\[]+)(\[.*\]$)?/);
+            var first = path[1];
+            if(path[2]){
+              //case of 'array[level1]' || 'array[level1][level2]'
+              path = path[2].match(/(?=\[(.*)\]$)/)[1].split('][')
+            }else{
+              //case of 'name'
+              path = [];
+            }
+            path.unshift(first);
+
+            setValue(data, path, value);
+          }
+          return data;
+        }
     }
   });
   </script>
