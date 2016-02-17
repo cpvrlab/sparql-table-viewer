@@ -169,7 +169,6 @@
             filtersFromQuerystring = null;
             loader.setFilters(prevFilterState);
             loader.setQuery(queryString);
-            console.log("bkle");
         }
         else
             loader.setQuery(queryString);
@@ -189,9 +188,6 @@
             mode: "sparql",
             readOnly: false
         });
-        console.log("---------------------------------");
-        console.log(getParameterByName("query"));
-        console.log("---------------------------------");
         queryEditor.setValue(queryString);
         queryEditor.refresh();
 

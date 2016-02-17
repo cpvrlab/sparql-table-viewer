@@ -321,12 +321,10 @@
             // if only one value is selected we can just add FILTER(?column = "value")
             // if all but one value is selected we can use FILTER(?column != "value")
             
-            console.log("Filters: ");
-            console.log(filters);
 
             sparqlQuery.filters = {};
             $.each(filters, function (column, filterValues) {
-                console.log(distinctValues[column]);
+
                 // continue if the filter has everything selected
                 // or is not loaded at all
                 if (/*typeof distinctValues[column] === 'undefined' || */
@@ -363,9 +361,7 @@
                 });
 
                 sparqlQuery.filters[column] += ")\n";
-
-                console.log("NEW FILTERS ");
-                console.log(sparqlQuery.filters[column]);    
+ 
             }); 
                  
         }
