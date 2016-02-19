@@ -103,11 +103,20 @@ a.header-icon {
     height: 100%;
     display: block;
     /* vertical-align: middle; */
-    line-height: 25px;
     margin-right: 1px;
     float: right;
     padding: 0;
+
+    .fa {
+        width: 100%;
+        height: 100%;
+        padding: 0px;
+        margin: 0px;
+        line-height: 24px;
+    }
 }
+
+
 
 
 div.loading-indicator {

@@ -615,9 +615,7 @@ if (typeof Slick === "undefined") {
         // custom modification for filter dropdown links
         if ($(e.target).hasClass("slick-sort-ignore"))
             return;
-
-          console.log(e.target);
-
+          
         var $col = $(e.target).closest(".slick-header-column");
         if (!$col.length) {
           return;
