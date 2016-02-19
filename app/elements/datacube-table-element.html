@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../lib/SlickGrid/slick.grid.css" type="text/css" />
     <link rel="stylesheet" href="../lib/SlickGrid/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css" />
     <link rel="stylesheet" href="../lib/CodeMirror/codemirror.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <content select=".content">
 <div class="elementcontainer">
 
@@ -25,7 +26,7 @@
 
     </form> 
     <div>
-        <h1>Raum, Umwelt</h1>
+        <h1>Raum, Umwelt</h1><i class="fa fa-filter"></i>
         <h2 class="datasetname">Title</h2>
         <p class="datasetcomment">Description</p>
         <p>1.1.1984 - 31.12.2014</p>
@@ -375,12 +376,12 @@
 
             grid.onHeaderCellRendered.subscribe(function (e, args) {
                 $(args.headerNode).empty();
-                // todo: a bit much to dynamically append, there is probably a much more elegant solution to this
                 var uniqueId = 'jq-dropdown-' + args.column.id + uniqueElementId.toString();
 
                 var filterMenu =
-                    '<div class="dropdown-container bfu-filter-dropdown">' +
-                    '    <span><a href="#" class="bfu-filter-dropdown" data-jq-dropdown="#' + uniqueId + '" ></a></span>'
+                    '<div class="dropdown-container">' +
+                    '    <span><a href="#" class="header-icon" data-jq-dropdown="#' + uniqueId + '" ><i class="fa fa-filter slick-sort-ignore"></i></a></span>' +
+                    '    <span><a href="#" class="header-icon"><i class="fa fa-info slick-sort-ignore"></i></a></span>' +
                 '</div>"';
                 $(filterMenu).appendTo(args.node);
             });
@@ -494,6 +495,17 @@
 
             $elementContainer.find(".language-select").first().on("change", function(e) {
                 // clear all rows
+                /*grid.setColumns(grid.getColumns());
+
+
+                var cols = grid.getColumns();
+                for(var i = 0, il = cols.length; i < il; i++)
+                {
+                    cols[i].name = cols[i].id + "hello";
+                }
+                grid.setColumns(cols);
+
+                */
                 grid.invalidateAllRows();
                 var vp = grid.getViewport();
                 // clear loader data
