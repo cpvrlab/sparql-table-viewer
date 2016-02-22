@@ -384,8 +384,8 @@
                 var uniqueId = 'jq-dropdown-' + args.column.id + uniqueElementId.toString();
 
                 var filterMenu =
-                    '<div class="dropdown-container bfu-filter-dropdown">' +
-                    '    <span><a href="#" class="bfu-filter-dropdown" data-jq-dropdown="#' + uniqueId + '" ></a></span>'
+                    '<div class="dropdown-container">' +
+                    '    <span><a href="#" class="header-icon" data-jq-dropdown="#' + uniqueId + '" ><i class="fa fa-filter slick-sort-ignore"></i></a></span>' +
                 '</div>"';
                 $(filterMenu).appendTo(args.node);
             });

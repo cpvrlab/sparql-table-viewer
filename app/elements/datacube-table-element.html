@@ -345,6 +345,19 @@
                     '       <li class="jq-dropdown-loading">loading</li>' +
                     '    </ul>' +
                     '</div>').appendTo($container);
+
+                    // add info dropdown as well
+                    var comment = columns[col].comment;
+                    if(comment == "")
+                        comment = "<i>N/A</i>";
+
+                    var uniqueId = 'jq-dropdown-' + columns[col].id + uniqueElementId.toString();
+                    $('<div id="' + uniqueId + 'info" class="jq-dropdown jq-dropdown-scroll jq-dropdown-anchor-right">' +
+                    '    <div class="jq-dropdown-panel">' +
+                    '' + comment + '' +
+                    '    </div>' +
+                    '</div>').appendTo($container);
+
                     // note: workaround for this: http://stackoverflow.com/a/643664
                     var testFunc = (function (columnId) {
                         return function () {
@@ -381,7 +394,7 @@
                 var filterMenu =
                     '<div class="dropdown-container">' +
                     '    <span><a href="#" class="header-icon" data-jq-dropdown="#' + uniqueId + '" ><i class="fa fa-filter slick-sort-ignore"></i></a></span>' +
-                    '    <span><a href="#" class="header-icon"><i class="fa fa-info slick-sort-ignore"></i></a></span>' +
+                    '    <span><a href="#" class="header-icon" data-jq-dropdown="#' + uniqueId + 'info"><i class="fa fa-info slick-sort-ignore"></i></a></span>' +
                 '</div>"';
                 $(filterMenu).appendTo(args.node);
             });

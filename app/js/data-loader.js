@@ -276,7 +276,7 @@
                         var colValueUserLang = col + "UserLang";
                         var colValueDefaultLang = col + "DefaultLang";
                         var colValue = col + "Value";
-                        var columnComment = (binding.columnComment != undefined) ? binding.columnComment.value : "";
+                        var columnComment = (binding.columnComment !== undefined) ? binding.columnComment.value : "";
                         columns.push({ id: colValue, name: binding.columnLabel.value, field: colValue, sortable: true, comment: columnComment, componentType: binding.componentType.value });  
 
                         // if dimension then look for label and filter language
@@ -449,7 +449,6 @@
                 });
 
                 sparqlQuery.filters[column] += ")\n";
- 
             }); 
                  
         }
