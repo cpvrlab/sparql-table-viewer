@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../lib/SlickGrid/slick.grid.css" type="text/css" />
     <link rel="stylesheet" href="../lib/SlickGrid/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css" />
     <link rel="stylesheet" href="../lib/CodeMirror/codemirror.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <content select=".content">
 <div class="elementcontainer">
 
@@ -383,8 +384,8 @@
                 var uniqueId = 'jq-dropdown-' + args.column.id + uniqueElementId.toString();
 
                 var filterMenu =
-                    '<div class="dropdown-container bfu-filter-dropdown">' +
-                    '    <span><a href="#" class="bfu-filter-dropdown" data-jq-dropdown="#' + uniqueId + '" ></a></span>'
+                    '<div class="dropdown-container">' +
+                    '    <span><a href="#" class="header-icon" data-jq-dropdown="#' + uniqueId + '" ><i class="fa fa-filter slick-sort-ignore"></i></a></span>' +
                 '</div>"';
                 $(filterMenu).appendTo(args.node);
             });

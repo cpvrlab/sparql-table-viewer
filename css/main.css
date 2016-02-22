@@ -66,6 +66,25 @@ li {
   .slickgrid-container .slick-header-column-sorted .slick-column-name {
     margin-left: 16px; }
 
+a.header-icon {
+  background: transparent;
+  color: #aebafe !important;
+  /* font-size: 16px; */
+  text-align: center;
+  width: 25px;
+  height: 100%;
+  display: block;
+  /* vertical-align: middle; */
+  margin-right: 1px;
+  float: right;
+  padding: 0; }
+  a.header-icon .fa {
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    margin: 0px;
+    line-height: 24px; }
+
 div.loading-indicator {
   display: block;
   margin: 0 3.5%;
@@ -107,23 +126,19 @@ div.loading-indicator label {
   display: block; }
 
 .dropdown-container {
-  width: 30px;
+  width: 100px;
   position: absolute;
   right: 0px;
   top: 0px;
   height: 100%;
+  padding-right: 5px;
   display: block; }
 
 .dropdown-container a {
-  /* color: white; */
-  background: url("../images/filter_icon.png") no-repeat center center;
-  display: block;
-  height: 100%;
-  width: 100%; }
+  /* color: white; */ }
 
 .dropdown-container a.active {
-  /* color: white; */
-  background: url("../images/filter_active_icon.png") no-repeat center center; }
+  /* color: white; */ }
 
 /* jq-dropdown */
 .jq-dropdown .jq-dropdown-menu, .jq-dropdown .jq-dropdown-panel {
@@ -161,3 +176,6 @@ div.loading-indicator label {
   margin: 0px 0px 4px;
   height: 25px;
   text-align: center; }
+
+.jq-dropdown .jq-dropdown-panel {
+  padding: 10px; }
