@@ -40,9 +40,13 @@
             <br />
             <br />
 
-            <a href="#" class="clear-filters">clear filters</a>  
             share link: 
             <input class="share-link" onClick="this.setSelectionRange(0, this.value.length)" value="Sample Text" /> 
+            &nbsp; | &nbsp;
+            <a href="#" class="visualize-link">visualize</a>  
+            &nbsp; | &nbsp;
+            <a href="#" class="clear-filters">clear filters</a>  
+            &nbsp; | &nbsp;
             <select class="language-select">
                 <option>de</option>
                 <option>fr</option>
@@ -489,6 +493,18 @@
                 return false;
 
             });
+
+
+            $elementContainer.find(".visualize-link").first().on("click", function(e) {
+                
+                var url = "http://yasgui.org/#query=" +
+                    encodeURIComponent(loader.compileSparqlQuery({ useLimit: false })) +
+                    "&endpoint=" + encodeURIComponent(endpoint) +
+                    "&contentTypeSelect=application%2Fsparql-results%2Bjson&contentTypeConstruct=text%2Fturtle" +
+                    "&requestMethod=POST&tabTitle=Query&headers=%7B%7D&outputFormat=table";
+                window.open(url, 'visualize-window');
+            });
+
 
             $elementContainer.find(".clear-filters").first().on("click", function(e) {
                 var columns = grid.getColumns();

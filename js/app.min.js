@@ -307,7 +307,7 @@
                     /**/
 
 
-                    console.log("\nGENERATED QUERY: \n\n" + newQuery);
+                    //console.log("\nGENERATED QUERY: \n\n" + newQuery);
                     setQuery(newQuery);
                     if(complete)
                         complete();
