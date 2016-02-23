@@ -31,23 +31,30 @@
         </div>
 
     </form> 
-    <div>
+    <div class="dataset-metadata">
         <h1>Raum, Umwelt</h1>
         <h2>Luftqualität Schweiz (Jahreswerte)</h2>
         <p>Messdaten (Jahreswerte) von nationalen, kantonalen und kommunalen Messstationen für Luftschadstoffe, zusammengestellt durch die Schweizerische Gesellschaft der Lufthygiene-Fachleute (Cercl'Air) und das BAFU</p>
         <p>1.1.1984 - 31.12.2014</p>
     </div>
-    <div style="float: right">
-        <span class="row-count">0</span> rows</span> <span class="error-message"></span>
-        <a class="toggle-query-edit" href="#">Query Editor</a>
-    </div>
-    <br>
-    <br>
         <div class="top-options">
+
+            <div style="float: right">
+                <span class="row-count">0</span> rows</span> <span class="error-message"></span>
+                <a class="toggle-query-edit" href="#">Query Editor</a>
+            </div>
+            <br />
+            <br />
 
             <a href="#" class="clear-filters">clear filters</a>  
             share link: 
             <input class="share-link" onClick="this.setSelectionRange(0, this.value.length)" value="Sample Text" /> 
+            <select class="language-select">
+                <option>de</option>
+                <option>fr</option>
+                <option>it</option>
+                <option>en</option>
+            </select>
         </div>
 
     <div class="slickgrid-container" style="width:100%;height: 490px;"></div>
