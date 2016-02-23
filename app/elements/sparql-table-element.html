@@ -487,11 +487,13 @@
             }
 
 
-                
-            $elementContainer.find(".download-submit").first().click(function (e) {                
-                $elementContainer.find(".download-query").first().val(loader.compileSparqlQuery({ useLimit: false }));
-                window.open('', 'download-window');
-                document.getElementById('download-form').submit();
+            $elementContainer.find(".download-submit").first().click(function (e) {          
+                var format = $elementContainer.find(".download-format").first().val();
+                $elementContainer.find(".download-query").first().val();
+                var url = endpoint + "?query=" + encodeURIComponent(loader.compileSparqlQuery({ useLimit: false })) + "&format=" + encodeURIComponent(format);
+                window.open(url, 'download-window');
+                return false;
+
             });
 
             $elementContainer.find(".clear-filters").first().on("click", function(e) {
