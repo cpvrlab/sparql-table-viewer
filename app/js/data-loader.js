@@ -115,7 +115,6 @@
         function loadColumnInfo() {  
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" +
             "PREFIX qb: <http://purl.org/linked-data/cube#>" +
             "SELECT ?datasetname ?datasetcomment WHERE { " +
             "<" + datastructuredefinition + "> a qb:DataStructureDefinition ." +
@@ -163,7 +162,6 @@
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" +
             "PREFIX qb: <http://purl.org/linked-data/cube#>" +
             "SELECT ?datasetname ?datasetcomment WHERE { " +
             "<" + datastructuredefinition + "> a qb:DataStructureDefinition ." +
@@ -200,7 +198,6 @@
             
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + 
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + 
-            "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>" + 
             "PREFIX qb: <http://purl.org/linked-data/cube#>" + 
             "SELECT * WHERE {" + 
             "?datacube a qb:DataStructureDefinition ." + 
@@ -211,7 +208,6 @@
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
-            "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>\n" + 
             "PREFIX qb: <http://purl.org/linked-data/cube#>\n" + 
             "SELECT ?column ?columnLabel ?columnComment ?componentType WHERE {\n" + 
             "<" + datastructuredefinition + "> a qb:DataStructureDefinition .\n" +
@@ -240,9 +236,10 @@
             "  FILTER(LANGMATCHES(lang(?columnCommentDefaultLang), '" + fallbackLanguage + "'))\n" + 
             "}\n" + 
             "BIND(COALESCE(?columnCommentUserLang, ?columnCommentDefaultLang) AS ?columnComment)\n" +
-            "}\n";
+            "}";
 
-
+            console.log(endPoint + "?query=" + encodeURIComponent(query));
+            console.log(query);
             // load dsd and build our query
             var req = $.ajax({
                 dataType: "json",
@@ -259,7 +256,6 @@
 
                     var newQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                    "PREFIX u28: <http://environment.data.admin.ch/ubd/28/>\n" +
                     "\n";
 
                     // add column selectors
