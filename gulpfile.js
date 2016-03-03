@@ -78,11 +78,12 @@ gulp.task('deploy-gh-pages', function() {
     .pipe(ghPages({push: true, message: "update"}));
 });
 
-gulp.task('deploy', function(cb) {
+// somehow this task doesn't work right
+/*gulp.task('deploy', function(cb) {
     runSequence('build',
         'deploy-gh-pages', 
         cb);
-});
+}); */
 
 // A development task to run anytime a file changes
 gulp.task('watch', function() {

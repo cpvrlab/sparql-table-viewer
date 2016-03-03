@@ -213,6 +213,7 @@
             "<" + datastructuredefinition + "> a qb:DataStructureDefinition .\n" +
             "<" + datastructuredefinition + "> ?p ?component .\n" + 
             "?component ?componentType ?column.\n" +
+            "?component qb:order ?order.\n" +
             "?column rdfs:label ?columnLabel .\n" + 
 
 
@@ -236,7 +237,8 @@
             "  FILTER(LANGMATCHES(lang(?columnCommentDefaultLang), '" + fallbackLanguage + "'))\n" + 
             "}\n" + 
             "BIND(COALESCE(?columnCommentUserLang, ?columnCommentDefaultLang) AS ?columnComment)\n" +
-            "}";
+            "}\n" +
+            "ORDER BY ?order";
 
             console.log(endPoint + "?query=" + encodeURIComponent(query));
             console.log(query);
