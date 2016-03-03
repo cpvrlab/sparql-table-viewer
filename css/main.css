@@ -25,11 +25,11 @@ li {
 
 .top-options {
   float: right;
-  height: 100%;
-  padding-top: 50px; }
+  height: 100%; }
 
 .dataset-metadata {
-  float: left; }
+  float: left;
+  width: 100%; }
 
 .text-right {
   text-align: right; }
