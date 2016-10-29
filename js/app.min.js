@@ -68,7 +68,7 @@
         function queryLanguageOptions(complete)
         {
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                "select distinct ?languages where {" +
+                "SELECT DISTINCT ?languages WHERE {" +
                 "?s rdfs:label ?o." +
                 "BIND(LANG(?o) as ?languages)} ";
 
@@ -78,7 +78,9 @@
                 data: { query: query },
                 url: endPoint,
                 callbackParameter: "callback",
-                Accept: "application/sparql-results+json",
+                headers : {
+                    Accept : 'application/sparql-results+json'
+                },
                 cache: true,
                 success: function (resp, textStatus, jqXHR) {
 
@@ -101,7 +103,7 @@
                         complete();
                 },
                 error: function () {
-                    console.log("couldn't load dsd");
+                    console.log("couldn't load languages");
                 }
             });
         }
@@ -116,7 +118,7 @@
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX qb: <http://purl.org/linked-data/cube#>" +
-            "SELECT ?datasetname ?datasetcomment WHERE { " +
+            "SELECT DISTINCT ?datasetname ?datasetcomment WHERE { " +
             "<" + datastructuredefinition + "> a qb:DataStructureDefinition ." +
             "?dataset a qb:DataSet." +
             "?dataset rdfs:label ?datasetname." +
@@ -131,7 +133,9 @@
                 data: { query: query },
                 url: endPoint,
                 callbackParameter: "callback",
-                Accept: "application/sparql-results+json",
+                headers : {
+                    Accept : 'application/sparql-results+json'
+                },
                 cache: true,
                 success: function (resp, textStatus, jqXHR) {
                     
@@ -163,7 +167,7 @@
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX qb: <http://purl.org/linked-data/cube#>" +
-            "SELECT ?datasetname ?datasetcomment WHERE { " +
+            "SELECT DISTINCT ?datasetname ?datasetcomment WHERE { " +
             "<" + datastructuredefinition + "> a qb:DataStructureDefinition ." +
             "?dataset a qb:DataSet." +
             "?dataset rdfs:label ?datasetname." +
@@ -178,7 +182,9 @@
                 data: { query: query },
                 url: endPoint,
                 callbackParameter: "callback",
-                Accept: "application/sparql-results+json",
+                headers : {
+                    Accept : 'application/sparql-results+json'
+                },
                 cache: true,
                 success: function (resp, textStatus, jqXHR) {
                     
@@ -194,39 +200,27 @@
         }
 
         // load data cube definition
-        function queryDataStructureDefinition(complete) {/*
-            
-            var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + 
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + 
-            "PREFIX qb: <http://purl.org/linked-data/cube#>" + 
-            "SELECT * WHERE {" + 
-            "?datacube a qb:DataStructureDefinition ." + 
-            "?datacube ?p ?o ." + 
-            "?o ?x ?y." +
-            "?y rdfs:label ?l" + 
-            "}";/**/
+        function queryDataStructureDefinition(complete) {
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + 
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + 
             "PREFIX qb: <http://purl.org/linked-data/cube#>\n" + 
-            "SELECT ?column ?columnLabel ?columnComment ?componentType WHERE {\n" + 
+            "SELECT DISTINCT ?column ?columnLabel ?columnComment ?componentType WHERE {\n" + 
             "<" + datastructuredefinition + "> a qb:DataStructureDefinition .\n" +
             "<" + datastructuredefinition + "> ?p ?component .\n" + 
             "?component ?componentType ?column.\n" +
+            "FILTER(?componentType != qb:order)\n" +
             "?component qb:order ?order.\n" +
-            "?column rdfs:label ?columnLabel .\n" + 
-
 
             "OPTIONAL { \n" +
-            "  ?column <http://www.w3.org/2000/01/rdf-schema#comment> ?columnLabelUserLang .\n" +
+            "  ?column rdfs:label ?columnLabelUserLang .\n" +
             "  FILTER(LANGMATCHES(lang(?columnLabelUserLang), '" + selectedLang + "'))\n" + 
             "}\n" + 
             "OPTIONAL { \n" +
-            "  ?column <http://www.w3.org/2000/01/rdf-schema#comment> ?columnLabelDefaultLang .\n" +
+            "  ?column rdfs:label ?columnLabelDefaultLang .\n" +
             "  FILTER(LANGMATCHES(lang(?columnLabelDefaultLang), '" + fallbackLanguage + "'))\n" + 
             "}\n" + 
             "BIND(COALESCE(?columnLabelUserLang, ?columnLabelDefaultLang) AS ?columnLabel)\n" +
-
 
             "OPTIONAL { \n" +
             "  ?column <http://www.w3.org/2000/01/rdf-schema#comment> ?columnCommentUserLang .\n" +
@@ -240,8 +234,6 @@
             "}\n" +
             "ORDER BY ?order";
 
-            console.log(endPoint + "?query=" + encodeURIComponent(query));
-            console.log(query);
             // load dsd and build our query
             var req = $.ajax({
                 dataType: "json",
@@ -249,24 +241,27 @@
                 data: { query: query },
                 url: endPoint,
                 callbackParameter: "callback",
-                Accept: "application/sparql-results+json",
+                headers : {
+                    Accept : 'application/sparql-results+json'
+                },
                 cache: true,
                 success: function (resp, textStatus, jqXHR) {
                     //console.log("DSD QUERY RESPONSE:\n");
                     //console.log(JSON.stringify(resp.results.bindings));
-
 
                     var newQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                     "\n";
 
                     // add column selectors
-                    newQuery += "SELECT ";
+                    newQuery += "SELECT DISTINCT ";
                     for(var i in resp.results.bindings)   {
-                        var col = /[^/]*$/.exec(resp.results.bindings[i].column.value)[0];
-                        newQuery += "?" + col + "Value "; // todo: careful, if more than one language this part will fail!
+                        var colV = /[^/]*$/.exec(resp.results.bindings[i].column.value)[0];
+                        newQuery += "?" + colV + "Value "; // todo: careful, if more than one language this part will fail!
                     }
-                    newQuery += " WHERE {\n";
+                    newQuery += " WHERE {\n" +
+                        "?m <http://purl.org/linked-data/cube#dataSet> ?dataset.\n" +
+                        "?dataset <http://purl.org/linked-data/cube#structure> <"+ datastructuredefinition +"> .\n";
 
                     for(i in resp.results.bindings)  {
                         var binding = resp.results.bindings[i];
@@ -275,7 +270,8 @@
                         var colValueDefaultLang = col + "DefaultLang";
                         var colValue = col + "Value";
                         var columnComment = (binding.columnComment !== undefined) ? binding.columnComment.value : "";
-                        columns.push({ id: colValue, name: binding.columnLabel.value, field: colValue, sortable: true, comment: columnComment, componentType: binding.componentType.value });  
+                        var columnLabel = (binding.columnLabel !== undefined) ? binding.columnLabel.value : binding.column.value;
+                        columns.push({ id: colValue, name: columnLabel, field: colValue, sortable: true, comment: columnComment, componentType: binding.componentType.value });  
 
                         // if dimension then look for label and filter language
                         if(binding.componentType.value != "http://purl.org/linked-data/cube#measure") {
@@ -300,10 +296,7 @@
                     }
                     newQuery += "}";
 
-
                     onColumnsChanged.notify(columns); 
-                    /**/
-
 
                     //console.log("\nGENERATED QUERY: \n\n" + newQuery);
                     setQuery(newQuery);
@@ -455,7 +448,7 @@
         {
             //console.log("requested filters for " + columnId);
             var queryObject = {
-                outerSelect: "SELECT DISTINCT(?" + columnId + ") WHERE",
+                outerSelect: "SELECT DISTINCT ?" + columnId + " WHERE",
                 orderBy: "ORDER BY ASC(?" + columnId + ")"
             };
 
@@ -466,7 +459,9 @@
                 data: { query: queryString },
                 url: endPoint,
                 callbackParameter: "callback",
-                Accept: "application/sparql-results+json",
+                headers : {
+                    Accept : 'application/sparql-results+json'
+                },
                 cache: true,
                 success: function (resp, textStatus, jqXHR) {
                     var vals = [];
@@ -501,14 +496,16 @@
             //       know that we're doing something (counting rows) but it will get called
             //       again in a sec when the actual data is being loaded... good or bad?
             onDataLoading.notify();
-            var queryString = compileSparqlQuery({ useLimit: false }, { outerSelect: "SELECT COUNT(*) as ?count WHERE" });
+            var queryString = compileSparqlQuery({ useLimit: false }, { outerSelect: "SELECT ( COUNT(*) as ?count) WHERE" });
             countXHR = $.ajax({
                 dataType: "json",
                 type: "POST",
                 data: { query: queryString },
                 url: endPoint,
                 callbackParameter: "callback",
-                Accept: "application/sparql-results+json",
+                headers : {
+                    Accept : 'application/sparql-results+json'
+                },
                 cache: true,
                 success: function (resp, textStatus, jqXHR) {
                     // the count query should always return with just one row and one column
@@ -607,7 +604,9 @@
                 data: { query: queryString },
                 url: endPoint,
                 callbackParameter: "callback",
-                Accept: 'application/sparql-results+json',
+                headers : {
+                    Accept : 'application/sparql-results+json'
+                },
                 cache: true,
                 success: ajaxSuccess,
                 error: function () {
