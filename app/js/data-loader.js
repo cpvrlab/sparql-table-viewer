@@ -275,7 +275,7 @@
 
                         // circumvent missing limits values problem, needs fix
                         if (binding.column.value == 'http://environment.data.admin.ch/ubd/28/qb/limitvalue') {
-                            newQuery += "OPTIONAL {\n"
+                            newQuery += "OPTIONAL {\n";
                         }
 
                         newQuery += "?m <" + binding.column.value + "> ?" + col + ".\n" +
@@ -292,7 +292,7 @@
                         "BIND(COALESCE(?" + colValueUserLang + ", ?" + colValueDefaultLang + ", ?" + col + ") AS ?" + colValue + ")\n\n";
 
                         if (binding.column.value == 'http://environment.data.admin.ch/ubd/28/qb/limitvalue') {
-                            newQuery += "}\n"
+                            newQuery += "}\n";
                         }
 
 
