@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>    
+	<script src="lib/webcomponentsjs/webcomponents-lite.min.js"></script>
+	<link rel="import" href="elements/sparql-table-element.html">
+	<link rel="stylesheet" href="css/main.css" type="text/css" />
+</head>
+<body>    
+<nav class="navbar">
+    <a href="index.html">datacube example udb28</a> | <a href="index_udb66.html">datacube example udb66</a> | <b>sparql query example</b>
+	<hr />
+</nav>
+
+<span style="color: #ff0000">Prototype, based on lindas-data.ch</span>
+
+	<sparql-table-viewer endpoint="https://lindas-data.ch/sparql" query="SELECT%20%20%3FMunicipality%20%3FDistrict%20%3FCanton%0D%0AWHERE%0D%0A%20%20%7B%20%3FVersionedMunicipality%20a%20%3Chttps%3A%2F%2Fgont.ch%2FMunicipalityVersion%3E%20.%0D%0A%20%20%20%20%3FVersionedMunicipality%20%3Chttps%3A%2F%2Fgont.ch%2FlongName%3E%20%20%3FMunicipality%20.%0D%0A%20%20%20%20%3Fdistrict%20%20%3Chttps%3A%2F%2Fgont.ch%2FlongName%3E%20%20%3FDistrict%20.%0D%0A%20%20%20%20%3FVersionedMunicipality%20%3Chttps%3A%2F%2Fgont.ch%2Fdistrict%3E%20%20%3Fdistrict%20.%0D%0A%20%20%20%20%3Fdistrict%20%20%3Chttps%3A%2F%2Fgont.ch%2FlongName%3E%20%20%3FDistrict%20.%0D%0A%20%20%20%20%3FVersionedMunicipality%20%3Chttps%3A%2F%2Fgont.ch%2Fcanton%3E%20%20%3Fcanton%20.%0D%0A%20%20%20%20%3Fcanton%20%20%20%3Chttps%3A%2F%2Fgont.ch%2FlongName%3E%20%20%3FCanton%20.%0D%0A%20%20%20%20%0D%0A%20%20%20%20%20FILTER%20NOT%20EXISTS%20%7B%20%3FVersionedMunicipality%20%3Chttps%3A%2F%2Fgont.ch%2FabolitionMode%3E%20%3Fmode%20%7D%0D%0A%20%20%7D"></sparql-table-viewer>
+</body>
+
+
+    <p>Berner Fachhochschule 2016, Marc Wacker, Michael Luggen<br>Uses <a href="https://github.com/mleibman/SlickGrid">SlickGrid</a> and <a href="https://codemirror.net/">CodeMirror</a></p>
+
+</html>
