@@ -37,9 +37,9 @@
         var onLanguageOptionsRetrieved = new Slick.Event();
         var onDatasetMetadataRetrieved = new Slick.Event();
 
-        function initFromDataCube(dsd, initialFilter) {  
+        function initFromDataCube(dsd, initialFilter) {
             initialFilter = initialFilter || [];
-            datastructuredefinition = dsd;         
+            datastructuredefinition = dsd;
             queryLanguageOptions(function() {
                 queryDataStructureMetadata();
                 queryDataStructureDefinition(function() {
@@ -67,14 +67,15 @@
 
         function queryLanguageOptions(complete)
         {
+
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "SELECT DISTINCT ?languages WHERE {" +
                 "?s rdfs:label ?o." +
-                "BIND(LANG(?o) as ?languages)} ";
+                "BIND(LANG(?o) as ?languages)} ORDER BY ?languages ";
 
             var req = $.ajax({
                 dataType: "json",
-                type: "POST",
+                type: "GET",
                 data: { query: query },
                 url: endPoint,
                 callbackParameter: "callback",
@@ -88,7 +89,7 @@
                     for(var i in resp.results.bindings) {
                         result = resp.results.bindings[i].languages.value;
 
-                        if(result !== "")
+                        if(result !== "" && result.length == 2)
                             languages.push(result);
                     }
 
@@ -97,8 +98,6 @@
 
                     onLanguageOptionsRetrieved.notify(languages);
 
-
-
                     if(complete)
                         complete();
                 },
@@ -106,6 +105,7 @@
                     console.log("couldn't load languages");
                 }
             });
+
         }
 
         function setLanguage(lang) {
@@ -129,7 +129,7 @@
 
             var req = $.ajax({
                 dataType: "json",
-                type: "POST",
+                type: "GET",
                 data: { query: query },
                 url: endPoint,
                 callbackParameter: "callback",
@@ -178,7 +178,7 @@
 
             var req = $.ajax({
                 dataType: "json",
-                type: "POST",
+                type: "GET",
                 data: { query: query },
                 url: endPoint,
                 callbackParameter: "callback",
@@ -213,31 +213,31 @@
             "?component qb:order ?order.\n" +
 
             "OPTIONAL { \n" +
-            "  ?column rdfs:label ?columnLabelUserLang .\n" +
-            "  FILTER(LANGMATCHES(lang(?columnLabelUserLang), '" + selectedLang + "'))\n" + 
+            "  ?column rdfs:label ?columnLabel.\n" +
+            "  FILTER(LANGMATCHES(lang(?columnLabel), '" + selectedLang + "'))\n" + 
             "}\n" + 
-            "OPTIONAL { \n" +
-            "  ?column rdfs:label ?columnLabelDefaultLang .\n" +
-            "  FILTER(LANGMATCHES(lang(?columnLabelDefaultLang), '" + fallbackLanguage + "'))\n" + 
-            "}\n" + 
-            "BIND(COALESCE(?columnLabelUserLang, ?columnLabelDefaultLang) AS ?columnLabel)\n" +
+//            "OPTIONAL { \n" +
+//            "  ?column rdfs:label ?columnLabelDefaultLang .\n" +
+//            "  FILTER(LANGMATCHES(lang(?columnLabelDefaultLang), '" + fallbackLanguage + "'))\n" + 
+//            "}\n" + 
+//            "BIND(COALESCE(?columnLabelUserLang, ?columnLabelDefaultLang) AS ?columnLabel)\n" +
 
             "OPTIONAL { \n" +
-            "  ?column <http://www.w3.org/2000/01/rdf-schema#comment> ?columnCommentUserLang .\n" +
+            "  ?column <http://www.w3.org/2000/01/rdf-schema#comment> ?columnComment .\n" +
             "  FILTER(LANGMATCHES(lang(?columnCommentUserLang), '" + selectedLang + "'))\n" + 
             "}\n" + 
-            "OPTIONAL { \n" +
-            "  ?column <http://www.w3.org/2000/01/rdf-schema#comment> ?columnCommentDefaultLang .\n" +
-            "  FILTER(LANGMATCHES(lang(?columnCommentDefaultLang), '" + fallbackLanguage + "'))\n" + 
-            "}\n" + 
-            "BIND(COALESCE(?columnCommentUserLang, ?columnCommentDefaultLang) AS ?columnComment)\n" +
+//            "OPTIONAL { \n" +
+//            "  ?column <http://www.w3.org/2000/01/rdf-schema#comment> ?columnCommentDefaultLang .\n" +
+//            "  FILTER(LANGMATCHES(lang(?columnCommentDefaultLang), '" + fallbackLanguage + "'))\n" + 
+//            "}\n" + 
+//            "BIND(COALESCE(?columnCommentUserLang, ?columnCommentDefaultLang) AS ?columnComment)\n" +
             "}\n" +
             "ORDER BY ?order";
 
             // load dsd and build our query
             var req = $.ajax({
                 dataType: "json",
-                type: "POST",
+                type: "GET",
                 data: { query: query },
                 url: endPoint,
                 callbackParameter: "callback",
@@ -284,12 +284,13 @@
                         "  FILTER(LANGMATCHES(lang(?" + colValueUserLang + "), '" + selectedLang + "') || lang(?" + colValueUserLang + ") = '')\n" +
                         "}\n" +
                         // go and get the fallback language value as well
-                        "OPTIONAL { \n" +
-                        "  ?" + col + " rdfs:label ?" + colValueDefaultLang + ".\n" +
-                        "  FILTER(LANGMATCHES(lang(?" + colValueDefaultLang + "), '" + fallbackLanguage + "') || lang(?" + colValueDefaultLang + ") = '')\n" +
-                        "}\n" +
+//                        "OPTIONAL { \n" +
+//                        "  ?" + col + " rdfs:label ?" + colValueDefaultLang + ".\n" +
+//                        "  FILTER(LANGMATCHES(lang(?" + colValueDefaultLang + "), '" + fallbackLanguage + "') || lang(?" + colValueDefaultLang + ") = '')\n" +
+//                        "}\n" +
                         // finally choose assign the correct language to ?col
-                        "BIND(COALESCE(?" + colValueUserLang + ", ?" + colValueDefaultLang + ", ?" + col + ") AS ?" + colValue + ")\n\n";
+                        "BIND(COALESCE(?" + colValueUserLang + ", ?" + col + ") AS ?" + colValue + ")\n\n";
+//                        "BIND(COALESCE(?" + colValueUserLang + ", ?" + colValueDefaultLang + ", ?" + col + ") AS ?" + colValue + ")\n\n";
 
                         if (binding.column.value == 'http://environment.data.admin.ch/ubd/28/qb/limitvalue') {
                             newQuery += "}\n";
@@ -458,7 +459,7 @@
             var queryString = compileSparqlQuery({ useLimit: false, useFilters: true, excludeFilterColumns: [columnId] }, queryObject);
             var req = $.ajax({
                 dataType: "json",
-                type: "POST",
+                type: "GET",
                 data: { query: queryString },
                 url: endPoint,
                 callbackParameter: "callback",
@@ -502,7 +503,7 @@
             var queryString = compileSparqlQuery({ useLimit: false }, { outerSelect: "SELECT ( COUNT(*) as ?count) WHERE" });
             countXHR = $.ajax({
                 dataType: "json",
-                type: "POST",
+                type: "GET",
                 data: { query: queryString },
                 url: endPoint,
                 callbackParameter: "callback",
@@ -603,7 +604,7 @@
             var sparqlPage = page + 1;
             var xhr = $.ajax({
                 dataType: 'json',
-                type: 'POST',
+                type: 'GET',
                 data: { query: queryString },
                 url: endPoint,
                 callbackParameter: "callback",
@@ -700,7 +701,7 @@
             "onRowCountChanged": onRowCountChanged,
             "onFilterValuesRetrieved": onFilterValuesRetrieved,
             "onErrorOccurred": onErrorOccurred,
-            "onLanguageOptionsRetrieved": onLanguageOptionsRetrieved,            
+            "onLanguageOptionsRetrieved": onLanguageOptionsRetrieved,
             "onDatasetMetadataRetrieved": onDatasetMetadataRetrieved
         };
     }
